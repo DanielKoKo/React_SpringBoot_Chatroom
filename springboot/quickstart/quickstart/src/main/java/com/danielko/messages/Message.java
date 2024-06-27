@@ -19,4 +19,9 @@ public class Message {
     private ObjectId id;
     private String name;
     private String message;
+
+    public Message(List<String> data) {
+        this.name = data.get(0);
+        this.message = data.get(1);
+    }
 }

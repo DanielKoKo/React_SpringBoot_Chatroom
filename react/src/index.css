@@ -15,10 +15,18 @@
     padding-top: 20px;
 }
 
-.text-box input[type="text"] {
+.text-box input[id="messageInput"] {
     width: 492px;
     font-size: 1.5rem;
     padding: 10px;
+    border-radius: 10px;
+}
+
+.text-box input[id="nameInput"] {
+    width: 200px;
+    font-size: 1.5rem;
+    padding: 10px;
+    margin-right: 10px;
     border-radius: 10px;
 }
 

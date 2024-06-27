@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 public class MessageController {
 
     @Autowired
@@ -15,15 +16,13 @@ public class MessageController {
 
     //@GetMapping("api/hello")
     @PostMapping("/receiveMessage")
-    @CrossOrigin(origins = "http://localhost:5173")
-    public ResponseEntity<List<Message>> receiveMessage(@RequestBody String message) {
-        System.out.println("Received message " + message);
-        return new ResponseEntity<List<Message>>(messageService.allMessages(), HttpStatus.OK);
+    public ResponseEntity<List<Message>> receiveMessage(@RequestBody List<String> data) {
+        System.out.println("Message: " + data);
+        messageService.uploadMessage(data);
+        return getAllMessages();
     }
 
-    @PostMapping("/getMessages")
-    @CrossOrigin(origins = "http://localhost:5173")
-    public ResponseEntity<List<Message>> getAllMessages(@RequestBody String message) {
+    public ResponseEntity<List<Message>> getAllMessages() {
         return new ResponseEntity<List<Message>>(messageService.allMessages(), HttpStatus.OK);
     }
 }
