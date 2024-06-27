@@ -1,21 +1,13 @@
 import React, {useState, useEffect} from 'react'
 
 function MyComponent() {
-    const [messages, setMessages] = useState(["First message"])
+    const [messages, setMessages] = useState([])
     const [newMessage, setNewMessage] = useState("")
 
-    const baseURL = "http://localhost:8080/receiveAndSend"
-
-    // receive response from back-end
-    // useEffect(() => {
-    //     axios.get(baseURL).then((response) => {
-    //         setNewMessage(response.data)
-    //         setMessages = (m => [...m, newMessage]) 
-    //     })
-    // })
+    const baseURL = "http://localhost:8080/"
 
     const handleMessageSubmit = async(e) => {
-        e.preventDefault()
+         e.preventDefault()
 
         const newMessage = document.getElementById("messageInput").value
 
@@ -28,16 +20,16 @@ function MyComponent() {
 
         try {
             // send message to back-end
-            const res = await fetch(baseURL, {
+            const res = await fetch(baseURL + "receiveMessage", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json",
                 },
                 body: newMessage
             })
 
             // receive response from back-end, update list of messages
-            setNewMessage(await res.text())
+            setNewMessage(await res.data)
             setMessages(m => [...m, newMessage])
         } catch (error) {
             console.error("Error sending message", error)

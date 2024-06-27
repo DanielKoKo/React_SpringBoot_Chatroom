@@ -1,4 +1,4 @@
-package com.danielko.quickstart;
+package com.danielko.messages;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
