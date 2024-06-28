@@ -6,6 +6,20 @@ function MyComponent() {
 
     const baseURL = "http://localhost:8080/"
 
+    // fetch all messages on startup
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const response = await axios.get(baseURL + "fetchMessages")
+                setMessages(response.data)
+            } catch (error) {
+                console.error("Error fetching messages", error)
+            }
+        }
+
+        fetchMessages()
+    }, [])
+
     const handleMessageSubmit = async(e) => {
          e.preventDefault()
 
@@ -24,9 +38,8 @@ function MyComponent() {
         const send = [nameToSend, message]
 
         try {
-            const response = await axios.post(baseURL + "receiveMessage", send)
-            const result = response.data
-            setMessages(result)
+            const response = await axios.post(baseURL + "sendAndReceive", send)
+            setMessages(response.data)
         } catch (error) {
             console.error("Error sending message", error)
         }

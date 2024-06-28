@@ -15,13 +15,14 @@ public class MessageController {
     private MessageService messageService;
 
     //@GetMapping("api/hello")
-    @PostMapping("/receiveMessage")
+    @PostMapping("/sendAndReceive")
     public ResponseEntity<List<Message>> receiveMessage(@RequestBody List<String> data) {
         System.out.println("Message: " + data);
         messageService.uploadMessage(data);
         return getAllMessages();
     }
 
+    @GetMapping("/fetchMessages")
     public ResponseEntity<List<Message>> getAllMessages() {
         return new ResponseEntity<List<Message>>(messageService.allMessages(), HttpStatus.OK);
     }
