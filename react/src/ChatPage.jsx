@@ -1,7 +1,10 @@
 import React, {useState, useEffect} from 'react'
+import {useLocation} from 'react-router-dom'
 import axios from 'axios'
 
 function ChatPage() {
+    const location = useLocation()
+    const username = location.state.username
     const [messages, setMessages] = useState([])
 
     const baseURL = "http://localhost:8080/"
@@ -33,9 +36,7 @@ function ChatPage() {
             return
         }
 
-        const name = document.getElementById("nameInput").value
-        const nameToSend = (name.trim() === "") ? "N/A" : name
-        const send = [nameToSend, message]
+        const send = [username, message]
 
         try {
             const response = await axios.post(baseURL + "sendAndReceive", send)
@@ -55,7 +56,6 @@ function ChatPage() {
             </div>
 
             <div className="text-box">
-                <input type="text" id="nameInput" placeholder="Name"/>
                 <input type="text" id="messageInput" placeholder="Message..."/>
                 <button onClick={handleMessageSubmit}>Send</button>
             </div>

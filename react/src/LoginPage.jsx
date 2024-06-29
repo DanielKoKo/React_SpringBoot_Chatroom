@@ -5,10 +5,10 @@ function LoginPage() {
     const navigate = useNavigate()
     const baseURL = "http://localhost:8080/"
 
-    const navigateToChat = () => {
-        navigate("/chatPage")
+    const navigateToChat = (username) => {
+        navigate("/chatPage", {state: {username:username}})
     }
-    
+
     const handleLogin = async(e) => {
         const username = document.getElementById("usernameInput").value
         const password = document.getElementById("passwordInput").value
@@ -17,7 +17,7 @@ function LoginPage() {
         try {
             const response = await axios.post(baseURL + "login", send)
             if (response.data) {
-                navigateToChat()
+                navigateToChat(username)
             } else {
                 console.log("not logged in")
             }
