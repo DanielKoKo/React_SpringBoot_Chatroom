@@ -1,10 +1,15 @@
-import MyComponent from './MyComponent.jsx'
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
+import ChatPage from './ChatPage.jsx'
+import LoginPage from './LoginPage.jsx'
 
 function App() {
   return(
-    <>
-        <MyComponent/>
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LoginPage/>}/>
+        <Route path="/chatPage" element={<ChatPage/>}/>
+      </Routes>
+    </Router>
 )
 }
 
