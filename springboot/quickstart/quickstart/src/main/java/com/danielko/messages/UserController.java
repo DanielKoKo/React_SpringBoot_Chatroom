@@ -16,4 +16,16 @@ public class UserController {
     public boolean verifyLogin(@RequestBody List<String> data) {
         return userService.searchForUser(data);
     }
+
+    @PostMapping("/register")
+    public boolean verifyRegister(@RequestBody List<String> data) {
+        boolean userExists = userService.searchForUser(data);
+
+        if (userExists) {
+            return false;
+        }
+
+        userService.addUser(data);
+        return true;
+    }
 }
