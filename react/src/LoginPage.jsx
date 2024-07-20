@@ -34,6 +34,11 @@ function LoginPage() {
     }
 
     const handleRegister = async() => {
+        if (username == "" || password == "") {
+            alert("Username or Password cannot be empty!")
+            return
+        }
+
         const send = [username, password]
 
         try {

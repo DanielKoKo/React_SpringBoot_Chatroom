@@ -9,7 +9,30 @@ function ChatPage() {
 
     const baseURL = "http://localhost:8080/"
 
-    // fetch all messages on startup
+    // const WebSocketComponent = () => {
+    //     useEffect(() => {
+    //         // Connecting to the WebSocket
+    //         const socket = new SockJS('http://localhost:8080/ws');
+    //         const stompClient = Stomp.over(socket);
+    
+    //         stompClient.connect({}, frame => {
+    //             console.log('Connected: ' + frame);
+    
+    //             // Subscribing to a topic
+    //             stompClient.subscribe('/topic/messages', message => {
+    //                 // Handle received messages
+    //                 console.log(JSON.parse(message.body).content);
+    //             });
+    //         });
+    
+    //         return () => {
+    //             stompClient.disconnect();
+    //             console.log("Disconnected");
+    //         };
+    //     }, []);
+    // }
+
+    // continuously fetch all messages
     useEffect(() => {
         const fetchMessages = async () => {
             try {
@@ -21,7 +44,7 @@ function ChatPage() {
         }
 
         fetchMessages()
-    }, [])
+    })
 
     const handleMessageSubmit = async(e) => {
          e.preventDefault()
@@ -51,7 +74,13 @@ function ChatPage() {
             <div className="message-box">
                 <ul>
                     {messages.map((data, index) =>
-                        <li key={index}>{data.name}: {data.message}</li>)}
+                        <li 
+                            key={index}
+                            className={data.name === username ? 'my-message' : 'other-message'}>
+                            {data.name}: {data.message}
+                        </li>
+                    )}
+                        
                 </ul>
             </div>
 

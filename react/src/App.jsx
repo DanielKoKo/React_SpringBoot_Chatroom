@@ -10,7 +10,7 @@ function App() {
         <Route path="/chatPage" element={<ChatPage/>}/>
       </Routes>
     </Router>
-)
+  )
 }
 
 export default App
