@@ -12,7 +12,15 @@ public class UserController {
 
     @PostMapping("/login")
     public boolean verifyLogin(@RequestBody List<String> data) {
-        return userService.searchForUser(data);
+        boolean loggedIn = userService.searchForUser(data);
+
+        if (loggedIn) {
+            System.out.println("User " + data.get(0) + " logged in successfully.");
+        }
+        else {
+            System.out.println("User " + data.get(0) + " failed to log in.");
+        }
+        return loggedIn;
     }
 
     @PostMapping("/register")

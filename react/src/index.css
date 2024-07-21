@@ -8,6 +8,8 @@ body {
 .message-box {
     width: 90vw;
     height: 50vw;
+    max-width: 120em;
+    max-height: 60em;
     margin-top: 20px;
     padding-right: 30px;
     overflow-y: auto;
@@ -38,12 +40,16 @@ body {
 }
 
 .text-box {
-    padding-top: 20px;
+    padding-top: 15px;
+    justify-content: flex-start;
+    align-self: flex-start;
 }
 
 .text-box input[id="messageInput"] {
+    flex-grow: 1;
     height: 15px;
-    width: 492px;
+    width: 82vw;
+    max-width: 87.3em;
     font-size: 1.3rem;
     padding: 10px;
     border-radius: 10px;

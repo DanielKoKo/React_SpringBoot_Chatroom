@@ -3,27 +3,32 @@ import {useNavigate} from 'react-router-dom'
 import React, {useState} from 'react'
 
 function LoginPage() {
-    const [username, setUsername] = useState("")
-    const [password, setPassword] = useState("")
+    const [userData, setUserData] = useState({
+        username: "",
+        password: ""
+    })
+
     const navigate = useNavigate()
-    const baseURL = "http://localhost:8080/"
+    const baseURL = "http://localhost:8080"
 
     const navigateToChat = () => {
-        navigate("/chatPage", {state: {username:username}})
+        console.log("Navigating to /chatPage...")
+        navigate("/chatPage", {state: {username: userData.username}})
     }
 
     const resetInputs = () => {
-        setUsername("")
-        setPassword("")
+        document.getElementById("usernameInput").value = ""
+        document.getElementById("passwordInput").value = ""
     }
 
     const handleLogin = async() => {
-        const send = [username, password]
+        const send = [userData.username, userData.password]
         
         try {
-            const isLoggedIn = await axios.post(baseURL + "login", send)
-            if (isLoggedIn.data == true) {
-                navigateToChat(username)
+            const loginRes = await axios.post(baseURL + "/login", send)
+            if (loginRes.data == true) {
+                console.log("[" + userData.username + "] logged in.")
+                navigateToChat()
             } else {
                 alert("User does not exist! Please create an account.")
                 resetInputs()
@@ -34,19 +39,19 @@ function LoginPage() {
     }
 
     const handleRegister = async() => {
-        if (username == "" || password == "") {
+        if (userData.username == "" || userData.password == "") {
             alert("Username or Password cannot be empty!")
             return
         }
 
-        const send = [username, password]
+        const send = [userData.username, userData.password]
 
         try {
-            const RegisterSuccess = await axios.post(baseURL + "register", send)
+            const RegisterSuccess = await axios.post(baseURL + "/register", send)
             if (RegisterSuccess.data == true) {
-                alert("User " + username + " successfully created!")
+                alert("User " + userData.username + " successfully created!")
             } else {
-                alert("User already exists! Please log in.")
+                alert("User already exists!")
             }
 
             resetInputs()
@@ -55,21 +60,20 @@ function LoginPage() {
         }
     }
 
+    // note: specify button as type="button" to avoid double submission
     return(
         <div className="login-box">
             <input 
                 type="text" 
                 id="usernameInput" 
                 placeholder="Username" 
-                onChange={(e) => setUsername(e.target.value)} 
-                value={username}/><br/>
+                onChange={(e) => setUserData({...userData, "username": e.target.value})}/><br/>
             <input 
                 type="text" 
                 id="passwordInput" 
                 placeholder="Password" 
-                onChange={(e) => setPassword(e.target.value)} 
-                value={password}/><br/>
-            <button onClick={handleLogin}>Login</button>
+                onChange={(e) => setUserData({...userData, "password": e.target.value})}/><br/>
+            <button type="button" onClick={handleLogin}>Login</button> 
             <button onClick={handleRegister}>Register</button>
         </div>
     )

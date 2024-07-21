@@ -10,12 +10,12 @@ public class MessageService {
     @Autowired
     private MessageRepository messageRepository;
 
-    public void uploadMessage(List<String> data) {
-        Message message = new Message(data);
+    public void uploadMessage(Message message) {
+        //Message message = new Message(data);
         messageRepository.save(message);
     }
 
-    public List<Message> allMessages() {
+    public List<Message> getAllMessages() {
         return messageRepository.findAll();
     }
 }
