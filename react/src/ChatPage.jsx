@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react'
-import {useLocation} from 'react-router-dom'
+import {useLocation, useNavigate} from 'react-router-dom'
 import axios from 'axios'
 import {over} from 'stompjs'
 import SockJS from 'sockjs-client/dist/sockjs'
@@ -9,10 +9,12 @@ var stompClient = null
 function ChatPage() {
     var isConnected = false
     const location = useLocation()
+    const navigate = useNavigate()
     const [messages, setMessages] = useState([])
     const [userData, setUserData] = useState({
         username: location.state.username,
-        message: ""
+        message: "",
+        prevJoined: location.state.prevJoined
     })
 
     const baseURL = "http://localhost:8080"
@@ -36,40 +38,84 @@ function ChatPage() {
         console.log(e)
     }
 
-    const userJoin = () => {
-        var messageToSend = {
-            senderName: userData.username,
-            status: "JOIN"
+    const hasJoined = async () => {
+        try {
+            const response = await axios.get(baseURL + "/findMessageWithUsername?username=" + userData.username)
+            console.log("hasJoined received: " + response.data)
+            
+            return response.data
+        } catch (error) {
+            console.error("Error finding username", error)
+            return true
         }
+    }
 
-        stompClient.send("/app/message", {}, JSON.stringify(messageToSend))
+    const userJoin = () => {
+        console.log("userJoin called, prevJoin = " + userData.prevJoined)
+
+        if (!userData.prevJoined) {
+            var messageToSend = {
+                senderName: userData.username,
+                content: userData.username + " has joined!",
+                status: "JOIN"
+            }
+
+            console.log("Message to send: [" + messageToSend.senderName + ", " + messageToSend.content + ", " + messageToSend.status + "]")
+    
+            stompClient.send("/app/message", {}, JSON.stringify(messageToSend))
+        }
+        //try {
+            //const response = await axios.get(baseURL + "/findMessageWithUsername?username=" + userData.username)
+            //console.log("userJoin received: " + response.data)
+
+            // only print join message if it's a new user
+        //     if (!response.data) {
+        //         var messageToSend = {
+        //             senderName: userData.username,
+        //             content: userData.username + " has joined!",
+        //             status: "JOIN"
+        //         }
+
+        //         console.log("Message to send: " + messageToSend)
+        
+        //         stompClient.send("/app/message", {}, JSON.stringify(messageToSend))
+        // }
+        // } catch (error) {
+        //     console.error("Error finding username", error)
+        // }
     }
 
     const onMessageReceived = (payload) => {
-        console.log("onMessageReceived called")
         let payloadData = JSON.parse(payload.body)
-        console.log("Received payload [" + payloadData.senderName + ", " + payloadData.content + ", " + payloadData.status + "]")
+        console.log("onMessageReceived received payload [" + payloadData.senderName + ", " + payloadData.content + ", " + payloadData.status + "]")
+        var newMessage;
 
-        switch(payloadData.status) {
-            case "JOIN":
-
-                break
-            case "MESSAGE":
-                const newMessage = {
-                    senderName: payloadData.senderName,
-                    content: payloadData.content
-                }
-                setMessages(prev => [...prev, newMessage])
-                break
+        
+        if (payloadData.status === "LEAVE") {
+            newMessage = {
+                content: payloadData.content,
+                status: payloadData.status
+            }
         }
+        else {
+            newMessage = {
+                senderName: payloadData.senderName,
+                content: payloadData.content,
+                status: payloadData.status
+            }
+        }
+
+        // case where React sends a join message to Spring, but user already joined
+        //if (newMessage.status != "JOIN")
+        setMessages(prev => [...prev, newMessage])
     }
 
-    const sendMessage = () => {
-        console.log("sendMessage called")
+    const sendMessage = (messageToSend) => {
+        console.log("sendMessage received " + messageToSend)
         if (stompClient) {
             let chatMessage = {
                 senderName: userData.username,
-                content: userData.message,
+                content: messageToSend,
                 status: 'MESSAGE'
             }
 
@@ -83,7 +129,6 @@ function ChatPage() {
             const response = await axios.get(baseURL + "/fetchMessages")
             console.log("fetchMessages received: " + response.data)
             setMessages(response.data)
-            console.log("Current messages: " + messages)
         } catch (error) {
             console.error("Error fetching messages", error)
         }
@@ -93,34 +138,68 @@ function ChatPage() {
         if (userData.username != null && !isConnected) {
             console.log("/chatpage received username [" + userData.username + "]")
             userConnect()
-        }
 
-        // old messages are fetched upon startup
-        fetchMessages()
+            // old messages are fetched upon startup
+            fetchMessages()
+        }
 
         // ensures useEffect hook is only called once
         return () => { isConnected = true } 
     }, [])
 
-    const handleMessageChange = async(e) => {
-        const message = document.getElementById("messageInput").value
-        setUserData({...userData, "message": message})
-    }
-
+    
     const handleMessageSubmit = async(e) => {
         e.preventDefault()
 
+        const message = document.getElementById("messageInput").value
+
         // only send non-empty messages
-        if (userData.message.trim() === "") {
+        if (message.trim() === "") {
             return
         }
 
-        console.log("Sending message: " + userData.message)
+        setUserData({...userData, "message": message})
 
-        // clear message input field
+        // clear non-empty message input field
         document.getElementById("messageInput").value = ""
 
-        sendMessage()
+        console.log("Sending message: " + message)
+
+        // need to pass message instead of using userData.message because it's not updated yet
+        sendMessage(message) 
+    }
+
+    function handleExit() {
+        var messageToSend = {
+            senderName: userData.username,
+            content: "",
+            status: "LEAVE"
+        }
+
+        stompClient.send("/app/message", {}, JSON.stringify(messageToSend))
+        navigateToLoginPage()
+    }
+
+    function navigateToLoginPage() {
+        navigate("/loginPage")
+    }
+
+    function getMessageClass(data) {
+        if (data.status === "JOIN" || data.status === "LEAVE")
+            return 'status-message'
+
+        if (data.senderName === userData.username)
+            return 'my-message'
+        else
+            return 'other-message'
+    }
+
+    function renderMessage(data) {
+        console.log("renderMessage received [" + data.senderName + ", " + data.content + ", " + data.status + "]")
+        if (data.status === "MESSAGE")
+            return `${data.senderName}: ${data.content}`
+        else if (data.status === "JOIN" || data.status === "LEAVE")
+            return `${data.content}`
     }
 
     return(
@@ -130,17 +209,20 @@ function ChatPage() {
                     {messages.map((data, index) =>
                         <li 
                             key={index}
-                            className={data.senderName === userData.username ? 'my-message' : 'other-message'}>
-                            {data.senderName}: {data.content}
+                            className={getMessageClass(data)}>
+                            {renderMessage(data)}
                         </li>
                     )}
                 </ul>
             </div>
 
             <div className="text-box">
-                <input type="text" id="messageInput" placeholder="Message..." onChange={handleMessageChange}/>
+                <input type="text" id="messageInput" placeholder="Message..."/>
                 <button onClick={handleMessageSubmit}>Send</button>
             </div>
+
+            <button onClick={navigateToLoginPage}>Leave Chat</button>
+            <button onClick= {() => {if (window.confirm("This action will delete your account and cannot be reversed!")) handleExit()}}>Delete Account</button>
         </>
     )
 }

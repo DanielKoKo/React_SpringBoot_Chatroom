@@ -39,6 +39,11 @@ body {
     align-self: flex-start;
 }
 
+.status-message {
+    justify-content: center;
+    align-self: center;
+}
+
 .text-box {
     padding-top: 15px;
     justify-content: flex-start;

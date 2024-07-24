@@ -12,7 +12,7 @@ public class UserController {
 
     @PostMapping("/login")
     public boolean verifyLogin(@RequestBody List<String> data) {
-        boolean loggedIn = userService.searchForUser(data);
+        boolean loggedIn = userService.searchForUsernameAndPassword(data);
 
         if (loggedIn) {
             System.out.println("User " + data.get(0) + " logged in successfully.");
@@ -20,12 +20,13 @@ public class UserController {
         else {
             System.out.println("User " + data.get(0) + " failed to log in.");
         }
+
         return loggedIn;
     }
 
     @PostMapping("/register")
     public boolean verifyRegister(@RequestBody List<String> data) {
-        boolean userExists = userService.searchForUser(data);
+        boolean userExists = userService.searchForUsernameAndPassword(data);
 
         if (userExists) {
             return false;
@@ -33,5 +34,14 @@ public class UserController {
 
         userService.addUser(data);
         return true;
+    }
+
+    @GetMapping("/findUsername")
+    public boolean findUser(@RequestParam String username) {
+        return userService.searchForUsername(username);
+    }
+
+    public void leaveChat(String username) {
+        userService.deleteUser(username);
     }
 }

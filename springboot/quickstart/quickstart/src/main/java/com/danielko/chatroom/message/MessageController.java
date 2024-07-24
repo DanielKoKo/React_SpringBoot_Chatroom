@@ -1,5 +1,7 @@
 package com.danielko.chatroom.message;
 
+import com.danielko.chatroom.user.UserController;
+import com.danielko.chatroom.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +11,6 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -19,32 +20,38 @@ public class MessageController {
     @Autowired
     private MessageService messageService;
 
-    private SimpMessagingTemplate simpMessagingTemplate;
+    @Autowired
+    private UserController userController;
+
 
     @MessageMapping("/message")
     @SendTo("/chatroom/public")
     public Message receiveMessage(@Payload Message message) {
         System.out.println("Received " + message);
-
         switch (message.getStatus()) {
             case JOIN:
                 System.out.println("User [" + message.getSenderName() + "] has joined.");
                 message.setContent(message.getSenderName() + " has joined!");
+                messageService.uploadMessage(message);
                 break;
             case MESSAGE:
+                messageService.uploadMessage(message);
+                break;
+            case LEAVE:
+                System.out.println("Case LEAVE");
+                message.setContent(message.getSenderName() + " has left!");
+                messageService.uploadMessage(message);
+                userController.leaveChat(message.getSenderName());
                 break;
         }
 
-        messageService.uploadMessage(message);
         return message;
     }
 
-//    @PostMapping("/sendAndReceive")
-//    public ResponseEntity<List<Message>> receiveMessage(@RequestBody List<String> data) {
-//        System.out.println("Message: " + data);
-//        messageService.uploadMessage(data);
-//        return getAllMessages();
-//    }
+    @GetMapping("/findMessageWithUsername")
+    public boolean findMessageWithUser(@RequestParam String username) {
+        return messageService.searchForUsername(username);
+    }
 
     @GetMapping("/fetchMessages")
     public ResponseEntity<List<Message>> getAllMessages() {

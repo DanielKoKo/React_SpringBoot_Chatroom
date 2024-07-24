@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom'
 import React, {useState} from 'react'
 
 function LoginPage() {
+    var prevJoined = true;
     const [userData, setUserData] = useState({
         username: "",
         password: ""
@@ -13,7 +14,7 @@ function LoginPage() {
 
     const navigateToChat = () => {
         console.log("Navigating to /chatPage...")
-        navigate("/chatPage", {state: {username: userData.username}})
+        navigate("/chatPage", {state: {username: userData.username, prevJoined: prevJoined}})
     }
 
     const resetInputs = () => {
@@ -49,7 +50,10 @@ function LoginPage() {
         try {
             const RegisterSuccess = await axios.post(baseURL + "/register", send)
             if (RegisterSuccess.data == true) {
+                prevJoined = false
                 alert("User " + userData.username + " successfully created!")
+
+                navigateToChat()
             } else {
                 alert("User already exists!")
             }

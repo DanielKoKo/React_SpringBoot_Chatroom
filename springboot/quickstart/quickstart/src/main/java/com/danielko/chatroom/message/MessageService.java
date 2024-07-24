@@ -11,11 +11,14 @@ public class MessageService {
     private MessageRepository messageRepository;
 
     public void uploadMessage(Message message) {
-        //Message message = new Message(data);
         messageRepository.save(message);
     }
 
     public List<Message> getAllMessages() {
         return messageRepository.findAll();
+    }
+
+    public boolean searchForUsername(String username) {
+        return messageRepository.existsBySenderName(username);
     }
 }

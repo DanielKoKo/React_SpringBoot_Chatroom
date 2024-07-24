@@ -3,7 +3,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -15,8 +14,18 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public boolean searchForUser(List<String> data) {
-        Optional<User> result = userRepository.findByUsernameAndPassword(data.get(0), data.get(1));
-        return result.isPresent();
+    // for checking if user exists (login, register)
+    public boolean searchForUsernameAndPassword(List<String> data) {
+        return userRepository.existsByUsernameAndPassword(data.get(0), data.get(1));
+    }
+
+    // for checking if user is in chatroom
+    public boolean searchForUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    public void deleteUser(String username) {
+        User user = userRepository.findByUsername(username);
+        userRepository.deleteById(user.getId());
     }
 }
