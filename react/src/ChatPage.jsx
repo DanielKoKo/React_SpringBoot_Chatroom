@@ -64,49 +64,19 @@ function ChatPage() {
     
             stompClient.send("/app/message", {}, JSON.stringify(messageToSend))
         }
-        //try {
-            //const response = await axios.get(baseURL + "/findMessageWithUsername?username=" + userData.username)
-            //console.log("userJoin received: " + response.data)
-
-            // only print join message if it's a new user
-        //     if (!response.data) {
-        //         var messageToSend = {
-        //             senderName: userData.username,
-        //             content: userData.username + " has joined!",
-        //             status: "JOIN"
-        //         }
-
-        //         console.log("Message to send: " + messageToSend)
-        
-        //         stompClient.send("/app/message", {}, JSON.stringify(messageToSend))
-        // }
-        // } catch (error) {
-        //     console.error("Error finding username", error)
-        // }
     }
 
     const onMessageReceived = (payload) => {
         let payloadData = JSON.parse(payload.body)
         console.log("onMessageReceived received payload [" + payloadData.senderName + ", " + payloadData.content + ", " + payloadData.status + "]")
         var newMessage;
-
         
-        if (payloadData.status === "LEAVE") {
-            newMessage = {
-                content: payloadData.content,
-                status: payloadData.status
-            }
-        }
-        else {
-            newMessage = {
-                senderName: payloadData.senderName,
-                content: payloadData.content,
-                status: payloadData.status
-            }
+        newMessage = {
+            senderName: payloadData.senderName,
+            content: payloadData.content,
+            status: payloadData.status
         }
 
-        // case where React sends a join message to Spring, but user already joined
-        //if (newMessage.status != "JOIN")
         setMessages(prev => [...prev, newMessage])
     }
 
@@ -134,12 +104,11 @@ function ChatPage() {
         }
     }
 
+    // connects user and fetch all messages upon startup
     useEffect(() => {
         if (userData.username != null && !isConnected) {
             console.log("/chatpage received username [" + userData.username + "]")
             userConnect()
-
-            // old messages are fetched upon startup
             fetchMessages()
         }
 
@@ -181,7 +150,7 @@ function ChatPage() {
     }
 
     function navigateToLoginPage() {
-        navigate("/loginPage")
+        navigate("/")
     }
 
     function getMessageClass(data) {
