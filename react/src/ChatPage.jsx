@@ -4,13 +4,12 @@ import axios from 'axios'
 import {over} from 'stompjs'
 import SockJS from 'sockjs-client/dist/sockjs'
 
-var stompClient = null
-
 function ChatPage() {
     var isConnected = false
     const location = useLocation()
     const navigate = useNavigate()
     const [messages, setMessages] = useState([])
+    const [users, setUsers] = useState([])
     const [userData, setUserData] = useState({
         username: location.state.username,
         message: "",
@@ -18,6 +17,7 @@ function ChatPage() {
     })
 
     const baseURL = "http://localhost:8080"
+    let stompClient = null
 
     const userConnect = () => {
         let sock = new SockJS(baseURL + "/ws")
@@ -34,21 +34,7 @@ function ChatPage() {
         userJoin()
     }
 
-    const onError = (e) => {
-        console.log(e)
-    }
-
-    const hasJoined = async () => {
-        try {
-            const response = await axios.get(baseURL + "/findMessageWithUsername?username=" + userData.username)
-            console.log("hasJoined received: " + response.data)
-            
-            return response.data
-        } catch (error) {
-            console.error("Error finding username", error)
-            return true
-        }
-    }
+    const onError = (e) => { console.log(e) }
 
     const userJoin = () => {
         console.log("userJoin called, prevJoin = " + userData.prevJoined)
@@ -56,6 +42,7 @@ function ChatPage() {
         if (!userData.prevJoined) {
             var messageToSend = {
                 senderName: userData.username,
+                receiverName: "All",
                 content: userData.username + " has joined!",
                 status: "JOIN"
             }
@@ -66,6 +53,16 @@ function ChatPage() {
         }
     }
 
+    const populateUsers = async() => {
+        try {
+            const response = await axios.get(baseURL + "/getUsers")
+            console.log("populateUsers received: " + response.data)
+            setUsers(response.data)
+        } catch (error) {
+            console.error("Error populating users", error)
+        }
+    }
+
     const onMessageReceived = (payload) => {
         let payloadData = JSON.parse(payload.body)
         console.log("onMessageReceived received payload [" + payloadData.senderName + ", " + payloadData.content + ", " + payloadData.status + "]")
@@ -73,18 +70,23 @@ function ChatPage() {
         
         newMessage = {
             senderName: payloadData.senderName,
+            receiverName: payloadData.receiverName,
             content: payloadData.content,
             status: payloadData.status
         }
 
-        setMessages(prev => [...prev, newMessage])
+        // only add message if it's public or current user's private
+        if (newMessage.senderName === userData.username || newMessage.receiverName === userData.username)
+            setMessages(prev => [...prev, newMessage])
     }
 
     const sendMessage = (messageToSend) => {
         console.log("sendMessage received " + messageToSend)
+
         if (stompClient) {
             let chatMessage = {
                 senderName: userData.username,
+                receiverName: document.getElementById("privateMessageDropdown").value,
                 content: messageToSend,
                 status: 'MESSAGE'
             }
@@ -96,8 +98,10 @@ function ChatPage() {
 
     const fetchMessages = async () => {
         try {
-            const response = await axios.get(baseURL + "/fetchMessages")
+            console.log("fetchMessages sending username " + userData.username)
+            const response = await axios.get(baseURL + "/fetchMessages?username=" + userData.username)
             console.log("fetchMessages received: " + response.data)
+
             setMessages(response.data)
         } catch (error) {
             console.error("Error fetching messages", error)
@@ -110,6 +114,7 @@ function ChatPage() {
             console.log("/chatpage received username [" + userData.username + "]")
             userConnect()
             fetchMessages()
+            populateUsers()
         }
 
         // ensures useEffect hook is only called once
@@ -123,22 +128,20 @@ function ChatPage() {
         const message = document.getElementById("messageInput").value
 
         // only send non-empty messages
-        if (message.trim() === "") {
-            return
+        if (message.trim() != "") {
+            setUserData({...userData, "message": message})
+
+            // clear non-empty message input `fi`eld
+            document.getElementById("messageInput").value = ""
+    
+            console.log("Sending message: " + message)
+    
+            // need to pass message instead of using userData.message because it's not updated yet
+            sendMessage(message) 
         }
-
-        setUserData({...userData, "message": message})
-
-        // clear non-empty message input field
-        document.getElementById("messageInput").value = ""
-
-        console.log("Sending message: " + message)
-
-        // need to pass message instead of using userData.message because it's not updated yet
-        sendMessage(message) 
     }
 
-    function handleExit() {
+    const handleExit = () => {
         var messageToSend = {
             senderName: userData.username,
             content: "",
@@ -149,26 +152,28 @@ function ChatPage() {
         navigateToLoginPage()
     }
 
-    function navigateToLoginPage() {
-        navigate("/")
-    }
+    const navigateToLoginPage = () => { navigate("/") }
 
-    function getMessageClass(data) {
+    const getMessageClass = (data) => {
         if (data.status === "JOIN" || data.status === "LEAVE")
             return 'status-message'
 
-        if (data.senderName === userData.username)
-            return 'my-message'
-        else
-            return 'other-message'
+        if (data.senderName === userData.username) {
+            return (data.receiverName != "All") ? 'my-private-message' : 'my-message'
+        }
+        else {
+            return (data.receiverName != "All") ? 'other-private-message' : 'other-message'
+        }
     }
 
-    function renderMessage(data) {
-        console.log("renderMessage received [" + data.senderName + ", " + data.content + ", " + data.status + "]")
+    const renderMessage = (data) => {
+        console.log("renderMessage received [" + data.senderName + ", " + data.receiverName + ", " + data.content + ", " + data.status + "]")
         if (data.status === "MESSAGE")
             return `${data.senderName}: ${data.content}`
         else if (data.status === "JOIN" || data.status === "LEAVE")
             return `${data.content}`
+
+        return null
     }
 
     return(
@@ -192,6 +197,18 @@ function ChatPage() {
 
             <button onClick={navigateToLoginPage}>Leave Chat</button>
             <button onClick= {() => {if (window.confirm("This action will delete your account and cannot be reversed!")) handleExit()}}>Delete Account</button>
+            <select id="privateMessageDropdown">
+                    <option value={"All"}>Send message to all</option>
+                    {users.map((user, index) => {
+                        if (user != userData.username) {
+                            return (
+                                <option key={index} value={user}>
+                                    Send message to {user}
+                                </option>
+                            )
+                        }
+                    })}
+            </select>
         </>
     )
 }

@@ -24,7 +24,8 @@ body {
 .message-box li {
     font-size: 1.6rem;
     font-family: Arial, Helvetica, sans-serif;
-    padding-bottom: 10px;
+    padding-top: 8px;
+    padding-bottom: 8px;
     display: flex;
     word-wrap: break-word;
 }
@@ -34,9 +35,21 @@ body {
     align-self: flex-end;
 }
 
+.my-private-message {
+    justify-content: flex-end;
+    align-self: flex-end;
+    color: rgb(200, 61, 61);
+}
+
 .other-message {
     justify-content: flex-start;
     align-self: flex-start;
+}
+
+.other-private-message {
+    justify-content: flex-start;
+    align-self: flex-start;
+    color: rgb(200, 61, 61);
 }
 
 .status-message {

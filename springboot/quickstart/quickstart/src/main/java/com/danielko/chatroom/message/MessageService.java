@@ -14,11 +14,7 @@ public class MessageService {
         messageRepository.save(message);
     }
 
-    public List<Message> getAllMessages() {
-        return messageRepository.findAll();
-    }
-
-    public boolean searchForUsername(String username) {
-        return messageRepository.existsBySenderName(username);
+    public List<Message> getMessages(String username) {
+        return messageRepository.findBySenderNameOrReceiverNameOrReceiverName(username, username, "All");
     }
 }

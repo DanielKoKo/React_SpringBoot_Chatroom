@@ -1,5 +1,8 @@
 package com.danielko.chatroom.user;
+import com.danielko.chatroom.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,6 +42,11 @@ public class UserController {
     @GetMapping("/findUsername")
     public boolean findUser(@RequestParam String username) {
         return userService.searchForUsername(username);
+    }
+
+    @GetMapping("/getUsers")
+    public ResponseEntity<List<String>> getUsers() {
+        return new ResponseEntity<List<String>>(userService.getAllUsers(), HttpStatus.OK);
     }
 
     public void leaveChat(String username) {

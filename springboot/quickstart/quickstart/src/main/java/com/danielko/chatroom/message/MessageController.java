@@ -1,14 +1,12 @@
 package com.danielko.chatroom.message;
 
 import com.danielko.chatroom.user.UserController;
-import com.danielko.chatroom.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +20,6 @@ public class MessageController {
 
     @Autowired
     private UserController userController;
-
 
     @MessageMapping("/message")
     @SendTo("/chatroom/public")
@@ -48,17 +45,10 @@ public class MessageController {
         return message;
     }
 
-    @GetMapping("/findMessageWithUsername")
-    public boolean findMessageWithUser(@RequestParam String username) {
-        return messageService.searchForUsername(username);
-    }
-
     @GetMapping("/fetchMessages")
-    public ResponseEntity<List<Message>> getAllMessages() {
-        System.out.println("Getting all messages");
-        List<Message> allMessages = messageService.getAllMessages();
-        System.out.println(allMessages);
-        return new ResponseEntity<List<Message>>(messageService.getAllMessages(), HttpStatus.OK);
+    public ResponseEntity<List<Message>> getAllMessages(@RequestParam String username) {
+        System.out.println("/fetchMessages received username [" + username + "]");
+        return new ResponseEntity<List<Message>>(messageService.getMessages(username), HttpStatus.OK);
     }
 }
 
