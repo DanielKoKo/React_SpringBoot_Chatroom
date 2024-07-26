@@ -15,6 +15,7 @@ public class MessageService {
     }
 
     public List<Message> getMessages(String username) {
-        return messageRepository.findBySenderNameOrReceiverNameOrReceiverName(username, username, "All");
+        System.out.println("getMessages received " + username);
+        return messageRepository.findBySenderAndReceiverNames(username, username, "All");
     }
 }

@@ -1,9 +1,10 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, memo} from 'react'
 import {useLocation, useNavigate} from 'react-router-dom'
 import axios from 'axios'
 import {over} from 'stompjs'
 import SockJS from 'sockjs-client/dist/sockjs'
 
+var stompClient = null
 function ChatPage() {
     var isConnected = false
     const location = useLocation()
@@ -17,7 +18,6 @@ function ChatPage() {
     })
 
     const baseURL = "http://localhost:8080"
-    let stompClient = null
 
     const userConnect = () => {
         let sock = new SockJS(baseURL + "/ws")
@@ -76,7 +76,7 @@ function ChatPage() {
         }
 
         // only add message if it's public or current user's private
-        if (newMessage.senderName === userData.username || newMessage.receiverName === userData.username)
+        if (newMessage.senderName === userData.username || newMessage.receiverName === userData.username || newMessage.receiverName === "All")
             setMessages(prev => [...prev, newMessage])
     }
 
@@ -91,6 +91,7 @@ function ChatPage() {
                 status: 'MESSAGE'
             }
 
+            console.log("sendMessage sending [" + chatMessage.senderName + ", " + chatMessage.receiverName + ", " + chatMessage.content + ", " + chatMessage.status + "]")
             stompClient.send('/app/message', {}, JSON.stringify(chatMessage))
             setUserData({...userData, "message":""})
         }
@@ -213,4 +214,4 @@ function ChatPage() {
     )
 }
 
-export default ChatPage
+export default memo(ChatPage)
