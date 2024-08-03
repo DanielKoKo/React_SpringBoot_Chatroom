@@ -28,6 +28,7 @@ public class MessageController {
         switch (message.getStatus()) {
             case JOIN:
                 System.out.println("User [" + message.getSenderName() + "] has joined.");
+                message.setReceiverName("All");
                 message.setContent(message.getSenderName() + " has joined!");
                 messageService.uploadMessage(message);
                 break;
@@ -36,12 +37,14 @@ public class MessageController {
                 break;
             case LEAVE:
                 System.out.println("Case LEAVE");
+                message.setReceiverName("All");
                 message.setContent(message.getSenderName() + " has left!");
                 messageService.uploadMessage(message);
                 userController.leaveChat(message.getSenderName());
                 break;
         }
 
+        System.out.println("Returning message " + message);
         return message;
     }
 

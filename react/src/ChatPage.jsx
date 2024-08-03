@@ -42,8 +42,6 @@ function ChatPage() {
         if (!userData.prevJoined) {
             var messageToSend = {
                 senderName: userData.username,
-                receiverName: "All",
-                content: userData.username + " has joined!",
                 status: "JOIN"
             }
 
