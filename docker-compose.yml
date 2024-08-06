@@ -1,0 +1,22 @@
+services:
+  database:
+    image: mongo:4.0-xenial
+    ports:
+      - 27017:27017
+    volumes:
+      - react_springboot_chatroom_volume:/data/db
+
+  backend:
+    build: ./springboot/quickstart/quickstart
+    ports:
+      - 8080:8080
+    environment:
+      DB_URL: mongodb://database/messages-db
+
+  frontend:
+    build: ./react
+    ports:
+      - 3000:3000
+
+volumes:
+  react_springboot_chatroom_volume:
