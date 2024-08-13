@@ -8,9 +8,9 @@ function LoginPage() {
         username: "",
         password: ""
     })
-
+    
     const navigate = useNavigate()
-    const baseURL = "http://localhost:8080"
+    const baseURL = "http://192.168.1.118:8080"
 
     const navigateToChat = () => {
         console.log("Navigating to /chatPage...")
