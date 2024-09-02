@@ -1,6 +1,7 @@
 import axios from 'axios'
 import {useNavigate} from 'react-router-dom'
 import React, {useState} from 'react'
+import './LoginPage.css'
 
 function LoginPage() {
     var prevJoined = true;
@@ -77,8 +78,10 @@ function LoginPage() {
                 id="passwordInput" 
                 placeholder="Password" 
                 onChange={(e) => setUserData({...userData, "password": e.target.value})}/><br/>
-            <button type="button" onClick={handleLogin}>Login</button> 
-            <button onClick={handleRegister}>Register</button>
+            <div className="buttons">
+                <button type="button" onClick={handleLogin}>Login</button> 
+                <button onClick={handleRegister}>Register</button>
+            </div>
         </div>
     )
 }

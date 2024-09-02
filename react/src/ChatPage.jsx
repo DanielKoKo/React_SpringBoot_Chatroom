@@ -2,6 +2,7 @@ import React, {useState, useEffect, memo} from 'react'
 import {useLocation, useNavigate} from 'react-router-dom'
 import axios from 'axios'
 import {over} from 'stompjs'
+import './ChatPage.css'
 import SockJS from 'sockjs-client/dist/sockjs'
 
 var stompClient = null
@@ -17,7 +18,7 @@ function ChatPage() {
         prevJoined: location.state.prevJoined
     })
 
-    const baseURL = "http://localhost:8080"
+    const baseURL = "http://192.168.1.118:8080"
 
     const userConnect = () => {
         let sock = new SockJS(baseURL + "/ws")
@@ -130,7 +131,7 @@ function ChatPage() {
         if (message.trim() != "") {
             setUserData({...userData, "message": message})
 
-            // clear non-empty message input `fi`eld
+            // clear non-empty message input field
             document.getElementById("messageInput").value = ""
     
             console.log("Sending message: " + message)
@@ -189,25 +190,27 @@ function ChatPage() {
                 </ul>
             </div>
 
-            <div className="text-box">
+            <div className="message-input-box">
                 <input type="text" id="messageInput" placeholder="Message..."/>
                 <button onClick={handleMessageSubmit}>Send</button>
             </div>
 
-            <button onClick={navigateToLoginPage}>Leave Chat</button>
-            <button onClick= {() => {if (window.confirm("This action will delete your account and cannot be reversed!")) handleExit()}}>Delete Account</button>
-            <select id="privateMessageDropdown">
-                    <option value={"All"}>Send message to all</option>
-                    {users.map((user, index) => {
-                        if (user != userData.username) {
-                            return (
-                                <option key={index} value={user}>
-                                    Send message to {user}
-                                </option>
-                            )
-                        }
-                    })}
-            </select>
+            <div className="bottom-tab">
+                <button onClick={navigateToLoginPage}>Leave Chat</button>
+                <button onClick= {() => {if (window.confirm("This action will delete your account and cannot be reversed!")) handleExit()}}>Delete Account</button>
+                <select id="privateMessageDropdown">
+                        <option value={"All"}>Send message to all</option>
+                        {users.map((user, index) => {
+                            if (user != userData.username) {
+                                return (
+                                    <option key={index} value={user}>
+                                        Send message to {user}
+                                    </option>
+                                )
+                            }
+                        })}
+                </select>
+            </div>
         </>
     )
 }

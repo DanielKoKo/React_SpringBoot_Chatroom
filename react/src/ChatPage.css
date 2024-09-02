@@ -1,0 +1,73 @@
+body {
+    display: flex;
+    overflow: hidden; /* prevents scrolling (hides content outside viewport) */
+}
+
+.message-box {
+    width: 75vw;
+    height: 40vw;
+    padding-right: 30px;
+    overflow-y: auto;
+    border: 1px solid;
+    background-color: #fafafa;
+}
+
+.message-box li {
+    font-size: 1.5rem;
+    font-family: Helvetica, sans-serif;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    display: flex;
+    word-wrap: break-word;
+}
+
+.my-message {
+    justify-content: flex-end;
+}
+
+.my-private-message {
+    justify-content: flex-end;
+    color: rgb(200, 61, 61);
+}
+
+.other-message {
+    justify-content: flex-start;
+}
+
+.other-private-message {
+    color: rgb(200, 61, 61);
+}
+
+.status-message {
+    justify-content: center;
+}
+
+.message-input-box {
+    padding-top: 15px;
+    padding-bottom: 10px;
+}
+
+.message-input-box input[id="messageInput"] {
+    flex-grow: 1;
+    height: 15px;
+    width: 82vw;
+    max-width: 87.3em;
+    font-size: 1.3rem;
+    padding: 10px;
+}
+
+.message-input-box button {
+    margin-left: 13px;
+    width: 3.9vw;
+    height: 40px;
+    font-size: 1.3rem;
+}
+
+.bottom-tab {
+    display: flex;
+    gap: 6px;
+}
+
+.bottom-tab button {
+    padding: 4px;
+}
