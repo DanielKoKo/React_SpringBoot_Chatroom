@@ -12,6 +12,7 @@ function ChatPage() {
     const navigate = useNavigate()
     const [messages, setMessages] = useState([])
     const [users, setUsers] = useState([])
+    const [tab, setTab] = useState("All") // either "All" or usernames for private chat tab
     const [userData, setUserData] = useState({
         username: location.state.username,
         message: "",
@@ -20,7 +21,7 @@ function ChatPage() {
 
     const baseURL = "http://192.168.1.118:8080"
 
-    const userConnect = () => {
+    function userConnect() {
         let sock = new SockJS(baseURL + "/ws")
         stompClient = over(sock) // wraps the SockJS client with STOMP capabilities
         
@@ -29,7 +30,7 @@ function ChatPage() {
                             onError)     // called when STOMP connection is unsuccessful
     }
 
-    const onConnected = () => {
+    function onConnected() {
         console.log("Web Socket connection successful.")
         stompClient.subscribe('/chatroom/public', onMessageReceived)
         userJoin()
@@ -37,7 +38,7 @@ function ChatPage() {
 
     const onError = (e) => { console.log(e) }
 
-    const userJoin = () => {
+    function userJoin() {
         console.log("userJoin called, prevJoin = " + userData.prevJoined)
 
         if (!userData.prevJoined) {
@@ -62,10 +63,10 @@ function ChatPage() {
         }
     }
 
-    const onMessageReceived = (payload) => {
+    function onMessageReceived(payload) {
         let payloadData = JSON.parse(payload.body)
         console.log("onMessageReceived received payload [" + payloadData.senderName + ", " + payloadData.content + ", " + payloadData.status + "]")
-        var newMessage;
+        let newMessage;
         
         newMessage = {
             senderName: payloadData.senderName,
@@ -79,7 +80,7 @@ function ChatPage() {
             setMessages(prev => [...prev, newMessage])
     }
 
-    const sendMessage = (messageToSend) => {
+    function sendMessage(messageToSend) {
         console.log("sendMessage received " + messageToSend)
 
         if (stompClient) {
@@ -100,12 +101,16 @@ function ChatPage() {
         try {
             console.log("fetchMessages sending username " + userData.username)
             const response = await axios.get(baseURL + "/fetchMessages?username=" + userData.username)
-            console.log("fetchMessages received: " + response.data)
 
             setMessages(response.data)
         } catch (error) {
             console.error("Error fetching messages", error)
         }
+    }
+
+    function handleTabChange(user) {
+        console.log("handleTabChange received: " + user)
+        setTab(user)
     }
 
     // connects user and fetch all messages upon startup
@@ -141,7 +146,7 @@ function ChatPage() {
         }
     }
 
-    const handleExit = () => {
+    function handleExit() {
         var messageToSend = {
             senderName: userData.username,
             content: "",
@@ -154,7 +159,7 @@ function ChatPage() {
 
     const navigateToLoginPage = () => { navigate("/") }
 
-    const getMessageClass = (data) => {
+    function getMessageClass(data) {
         if (data.status === "JOIN" || data.status === "LEAVE")
             return 'status-message'
 
@@ -166,50 +171,83 @@ function ChatPage() {
         }
     }
 
-    const renderMessage = (data) => {
-        console.log("renderMessage received [" + data.senderName + ", " + data.receiverName + ", " + data.content + ", " + data.status + "]")
-        if (data.status === "MESSAGE")
-            return `${data.senderName}: ${data.content}`
-        else if (data.status === "JOIN" || data.status === "LEAVE")
-            return `${data.content}`
+    function renderUsername(data) {
+        if ((data.senderName !== userData.username) && (data.status === "MESSAGE")) {
+            return <span>{data.senderName}</span>
+        }
+    }
 
-        return null
+    function renderMessage(data) {
+        console.log("renderMessage received [" + data.senderName + ", " + data.receiverName + ", " + data.content + ", " + data.status + "]")
+
+        if (tab === "All") {
+            if (data.status === "MESSAGE" && data.receiverName === "All")
+                return data.content
+            else if (data.status === "JOIN" || data.status === "LEAVE")
+                return data.content
+        }
+        else if ((data.senderName === tab && data.receiverName === userData.username) || 
+                 (data.senderName === userData.username && data.receiverName === tab)) {
+            return data.content
+        }
     }
 
     return(
         <>
-            <div className="message-box">
-                <ul>
-                    {messages.map((data, index) =>
-                        <li 
-                            key={index}
-                            className={getMessageClass(data)}>
-                            {renderMessage(data)}
-                        </li>
+            <div className="frame">
+                <ul className="users">
+                    <li key={"All"} onClick={() => {handleTabChange("All")}}>All</li>
+                    {users.map((user, index) => {
+                            if (user != userData.username) {
+                                return <li key={index}
+                                           onClick={() => {handleTabChange(user)}}>
+                                        {user}
+                                        </li>    
+                            }
+                        }
                     )}
                 </ul>
-            </div>
 
-            <div className="message-input-box">
-                <input type="text" id="messageInput" placeholder="Message..."/>
-                <button onClick={handleMessageSubmit}>Send</button>
-            </div>
+                <div className="message-frame">
+                    <div className="message-box">
+                        <ul>
+                            {messages.map((message, index) => {
+                                const content = renderMessage(message)
+                                
+                                if (renderMessage(message)) {
+                                    return (<>
+                                                {renderUsername(message)}
+                                                <li key={index}
+                                                className={getMessageClass(message)}>
+                                                {renderMessage(message)}
+                                                </li>
+                                            </>)
+                                }}
+                            )}
+                        </ul>
+                    </div>
 
-            <div className="bottom-tab">
-                <button onClick={navigateToLoginPage}>Leave Chat</button>
-                <button onClick= {() => {if (window.confirm("This action will delete your account and cannot be reversed!")) handleExit()}}>Delete Account</button>
-                <select id="privateMessageDropdown">
-                        <option value={"All"}>Send message to all</option>
-                        {users.map((user, index) => {
-                            if (user != userData.username) {
-                                return (
-                                    <option key={index} value={user}>
-                                        Send message to {user}
-                                    </option>
-                                )
-                            }
-                        })}
-                </select>
+                    <div className="message-input-box">
+                        <input type="text" id="messageInput" placeholder="Message..."/>
+                        <button onClick={handleMessageSubmit}>Send</button>
+                    </div>
+                    <div className="bottom-tab">
+                        <button onClick={navigateToLoginPage}>Leave Chat</button>
+                        <button onClick= {() => {if (window.confirm("This action will delete your account and cannot be reversed!")) handleExit()}}>Delete Account</button>
+                        <select id="privateMessageDropdown">
+                                <option value={"All"}>Send message to all</option>
+                                {users.map((user, index) => {
+                                    if (user != userData.username) {
+                                        return (
+                                            <option key={index} value={user}>
+                                                Send message to {user}
+                                            </option>
+                                        )
+                                    }
+                                })}
+                        </select>
+                    </div>
+                </div>
             </div>
         </>
     )
