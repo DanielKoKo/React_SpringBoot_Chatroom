@@ -1,73 +1,113 @@
 import axios from 'axios'
 import {useNavigate} from 'react-router-dom'
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import './LoginPage.css'
+import {WebSocketContext} from './WebSocketProvider.jsx'
+import {over} from 'stompjs'
+import SockJS from 'sockjs-client/dist/sockjs'
 
 function LoginPage() {
-    var prevJoined = true;
+    const [info, setInfo] = useState("") // e.g. "incorrect username/password", "account already exists", etc.
     const [userData, setUserData] = useState({
         username: "",
         password: ""
     })
-    
+    const [stompClient, setStompClient] = useState(null)
     const navigate = useNavigate()
     const baseURL = "http://192.168.1.118:8080"
 
-    const navigateToChat = () => {
-        console.log("Navigating to /chatPage...")
-        navigate("/chatPage", {state: {username: userData.username, prevJoined: prevJoined}})
+    function stompConnect() {
+        let sock = new SockJS(baseURL + "/ws")
+        let stompVar = over(sock) // wraps the SockJS client with STOMP capabilities
+        
+        stompVar.connect({},                       // headers to send
+                         onConnected(stompVar),    // called when STOMP connection is successful
+                         (e) => {console.log(e)})  // called when STOMP connection is unsuccessful
     }
 
-    const resetInputs = () => {
+    useEffect(() => {
+        stompConnect()
+
+        // clean up - disconnect upon component unmount
+        return () => {
+            if (stompClient) {
+                stompClient.disconnect()
+                console.log("WebSocket disconnected successfully")
+            }
+        }
+    }, [])
+
+    function onConnected(stompVar) {
+        console.log("Web Socket connection successful.")
+        setStompClient(stompVar)
+    }
+
+    const navigateToChat = () => {
+        if (stompClient) {
+            console.log("Navigating to /chatPage...")
+            console.log("passing stomp to /chatPage: ", stompClient)
+            navigate("/chatPage", {state: {username: userData.username}})
+        }
+    }
+
+    function resetInputs() {
         document.getElementById("usernameInput").value = ""
         document.getElementById("passwordInput").value = ""
     }
-
-    const handleLogin = async() => {
-        const send = [userData.username, userData.password]
-        
-        try {
-            const loginRes = await axios.post(baseURL + "/login", send)
-            if (loginRes.data == true) {
-                console.log("[" + userData.username + "] logged in.")
-                navigateToChat()
-            } else {
-                alert("User does not exist! Please create an account.")
-                resetInputs()
-            }
-        } catch (error) {
-            console.error("Error logging in", error)
+    
+    function verifyFields() {
+        if (userData.username === "" || userData.password === "") {
+            setInfo("Username or password field must not be empty!")
+            resetInputs()
+            return false
         }
+
+        return true
     }
 
-    const handleRegister = async() => {
-        if (userData.username == "" || userData.password == "") {
-            alert("Username or Password cannot be empty!")
+    const handleAxio = async(path) => {
+        if (!verifyFields()) 
             return
-        }
 
         const send = [userData.username, userData.password]
 
         try {
-            const RegisterSuccess = await axios.post(baseURL + "/register", send)
-            if (RegisterSuccess.data == true) {
-                prevJoined = false
-                alert("User " + userData.username + " successfully created!")
+            const res = await axios.post(baseURL + path, send)
+            
+            if (res.data === true) {
+                if (path === "/login") {
+                    console.log("[" + userData.username + "] logged in.")
+                    setInfo("Logging in...")
+                } 
+                else if (path === "/register") {
+                    stompClient.send('/app/message', {}, JSON.stringify({senderName: userData.username, status: "JOIN"}))
+                    setInfo("Account successfully created! Logging in...")
+                }
 
+                await new Promise(resolve => setTimeout(resolve, 1500))
                 navigateToChat()
-            } else {
-                alert("User already exists!")
+            }
+            else {
+                path === "/login" ? setInfo("Incorrect username or password.") : setInfo("Error creating account.")
             }
 
             resetInputs()
         } catch (error) {
-            console.error("Error logging in", error)
+            setInfo("Connection error.")
         }
     }
 
-    // note: specify button as type="button" to avoid double submission
+    function renderInfo() {
+        if (info !== "") {
+            return <span>{info}</span>
+        }
+    }
+
+    // - specify button as type="button" to avoid double submission (default browser behavior)
+    // - need spread operators for setUserData because otherwise, the unspecified parameter will be set to ""
     return(
         <div className="login-box">
+            {renderInfo()}
             <input 
                 type="text" 
                 id="usernameInput" 
@@ -79,8 +119,8 @@ function LoginPage() {
                 placeholder="Password" 
                 onChange={(e) => setUserData({...userData, "password": e.target.value})}/><br/>
             <div className="buttons">
-                <button type="button" onClick={handleLogin}>Login</button> 
-                <button onClick={handleRegister}>Register</button>
+                <button type="button" onClick={() => {handleAxio("/login")}}>Login</button> 
+                <button onClick={() => {handleAxio("/register")}}>Register</button>
             </div>
         </div>
     )

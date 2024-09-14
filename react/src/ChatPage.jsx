@@ -1,13 +1,13 @@
 import React, {useState, useEffect, memo} from 'react'
 import {useLocation, useNavigate} from 'react-router-dom'
 import axios from 'axios'
-import {over} from 'stompjs'
 import './ChatPage.css'
+import {over} from 'stompjs'
 import SockJS from 'sockjs-client/dist/sockjs'
 
-var stompClient = null
+let stompClient = null
+
 function ChatPage() {
-    var isConnected = false
     const location = useLocation()
     const navigate = useNavigate()
     const [messages, setMessages] = useState([])
@@ -15,44 +15,25 @@ function ChatPage() {
     const [tab, setTab] = useState("All") // either "All" or usernames for private chat tab
     const [userData, setUserData] = useState({
         username: location.state.username,
-        message: "",
-        prevJoined: location.state.prevJoined
+        message: ""
     })
 
     const baseURL = "http://192.168.1.118:8080"
 
-    function userConnect() {
+    function stompConnect() {
         let sock = new SockJS(baseURL + "/ws")
-        stompClient = over(sock) // wraps the SockJS client with STOMP capabilities
+        stompClient  = over(sock) // wraps the SockJS client with STOMP capabilities
         
-        stompClient.connect({},          // headers to send
-                            onConnected, // called when STOMP connection is successful
-                            onError)     // called when STOMP connection is unsuccessful
+        stompClient.connect({},                    // headers to send
+                         onConnected,              // called when STOMP connection is successful
+                         (e) => {console.log(e)})  // called when STOMP connection is unsuccessful
     }
 
     function onConnected() {
         console.log("Web Socket connection successful.")
         stompClient.subscribe('/chatroom/public', onMessageReceived)
-        userJoin()
     }
-
-    const onError = (e) => { console.log(e) }
-
-    function userJoin() {
-        console.log("userJoin called, prevJoin = " + userData.prevJoined)
-
-        if (!userData.prevJoined) {
-            var messageToSend = {
-                senderName: userData.username,
-                status: "JOIN"
-            }
-
-            console.log("Message to send: [" + messageToSend.senderName + ", " + messageToSend.content + ", " + messageToSend.status + "]")
     
-            stompClient.send("/app/message", {}, JSON.stringify(messageToSend))
-        }
-    }
-
     const populateUsers = async() => {
         try {
             const response = await axios.get(baseURL + "/getUsers")
@@ -63,16 +44,36 @@ function ChatPage() {
         }
     }
 
+    // connects user and fetch all messages upon startup
+    useEffect(() => {
+        if (userData.username != null) {
+            console.log("/chatpage received username [" + userData.username + "]")
+            stompConnect()
+            fetchMessages()
+            populateUsers()
+        }
+
+        // clean up - unsubscribe and disconnect upon component unmount
+        return () => {
+            if (stompClient) {
+                stompClient.disconnect()
+                console.log("WebSocket disconnected successfully")
+            }
+        }
+    }, [])
+
     function onMessageReceived(payload) {
         let payloadData = JSON.parse(payload.body)
         console.log("onMessageReceived received payload [" + payloadData.senderName + ", " + payloadData.content + ", " + payloadData.status + "]")
-        let newMessage;
-        
-        newMessage = {
+        let newMessage = {
             senderName: payloadData.senderName,
             receiverName: payloadData.receiverName,
             content: payloadData.content,
             status: payloadData.status
+        }
+
+        if (newMessage.status === "JOIN") {
+            setUsers(prevUsers => [...prevUsers, newMessage.senderName])
         }
 
         // only add message if it's public or current user's private
@@ -86,7 +87,7 @@ function ChatPage() {
         if (stompClient) {
             let chatMessage = {
                 senderName: userData.username,
-                receiverName: document.getElementById("privateMessageDropdown").value,
+                receiverName: tab,
                 content: messageToSend,
                 status: 'MESSAGE'
             }
@@ -110,21 +111,16 @@ function ChatPage() {
 
     function handleTabChange(user) {
         console.log("handleTabChange received: " + user)
-        setTab(user)
+
+        // checks if we're clicking on current tab
+        if (user !== tab)
+            setTab(user)
     }
 
-    // connects user and fetch all messages upon startup
-    useEffect(() => {
-        if (userData.username != null && !isConnected) {
-            console.log("/chatpage received username [" + userData.username + "]")
-            userConnect()
-            fetchMessages()
-            populateUsers()
-        }
-
-        // ensures useEffect hook is only called once
-        return () => { isConnected = true } 
-    }, [])
+    function getTabClass(user) {
+        console.log("getTabClass received: ", user)
+        return user === tab ? "selected-user" : "unselected-user"
+    }
 
     
     const handleMessageSubmit = async(e) => {
@@ -163,31 +159,24 @@ function ChatPage() {
         if (data.status === "JOIN" || data.status === "LEAVE")
             return 'status-message'
 
-        if (data.senderName === userData.username) {
-            return (data.receiverName != "All") ? 'my-private-message' : 'my-message'
-        }
-        else {
-            return (data.receiverName != "All") ? 'other-private-message' : 'other-message'
-        }
+        return data.senderName === userData.username ? "my-message" : "other-message"
     }
 
     function renderUsername(data) {
-        if ((data.senderName !== userData.username) && (data.status === "MESSAGE")) {
-            return <span>{data.senderName}</span>
+        if (data.status === "MESSAGE") {
+            return <span className={(data.senderName === userData.username) ? "my-username" : "other-username"}>{data.senderName}</span>
         }
     }
 
     function renderMessage(data) {
         console.log("renderMessage received [" + data.senderName + ", " + data.receiverName + ", " + data.content + ", " + data.status + "]")
 
-        if (tab === "All") {
-            if (data.status === "MESSAGE" && data.receiverName === "All")
-                return data.content
-            else if (data.status === "JOIN" || data.status === "LEAVE")
-                return data.content
+        // public message
+        if (tab === "All" && data.receiverName === "All") {
+            return data.content
         }
-        else if ((data.senderName === tab && data.receiverName === userData.username) || 
-                 (data.senderName === userData.username && data.receiverName === tab)) {
+        // private message
+        else if ((tab == data.senderName || tab == data.receiverName) && (data.receiverName === userData.username || data.senderName === userData.username)) {
             return data.content
         }
     }
@@ -195,25 +184,26 @@ function ChatPage() {
     return(
         <>
             <div className="frame">
-                <ul className="users">
-                    <li key={"All"} onClick={() => {handleTabChange("All")}}>All</li>
-                    {users.map((user, index) => {
-                            if (user != userData.username) {
-                                return <li key={index}
-                                           onClick={() => {handleTabChange(user)}}>
-                                        {user}
-                                        </li>    
+                <div className="users-frame">
+                    <ul>
+                        <li key={"All"} className={getTabClass("All")} onClick={() => {handleTabChange("All")}}>All</li>
+                        {users.map((user, index) => {
+                                if (user != userData.username) {
+                                    return <li key={index}
+                                               className={getTabClass(user)}
+                                               onClick={() => {handleTabChange(user)}}>
+                                               {user}
+                                            </li>    
+                                }
                             }
-                        }
-                    )}
-                </ul>
+                        )}
+                    </ul>
+                </div>
 
                 <div className="message-frame">
                     <div className="message-box">
                         <ul>
                             {messages.map((message, index) => {
-                                const content = renderMessage(message)
-                                
                                 if (renderMessage(message)) {
                                     return (<>
                                                 {renderUsername(message)}
@@ -234,18 +224,6 @@ function ChatPage() {
                     <div className="bottom-tab">
                         <button onClick={navigateToLoginPage}>Leave Chat</button>
                         <button onClick= {() => {if (window.confirm("This action will delete your account and cannot be reversed!")) handleExit()}}>Delete Account</button>
-                        <select id="privateMessageDropdown">
-                                <option value={"All"}>Send message to all</option>
-                                {users.map((user, index) => {
-                                    if (user != userData.username) {
-                                        return (
-                                            <option key={index} value={user}>
-                                                Send message to {user}
-                                            </option>
-                                        )
-                                    }
-                                })}
-                        </select>
                     </div>
                 </div>
             </div>

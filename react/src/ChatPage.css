@@ -13,12 +13,12 @@ body {
     }
 }
 
-.users {
+.users-frame {
     justify-content: center;    
-    margin-top: -5px;
+    margin-top: -16px;
 }
 
-.users li {
+.unselected-user {
     margin-top: 5px;
     margin-right: 10px;
     padding: 12px;
@@ -31,10 +31,22 @@ body {
     color: rgb(246, 242, 242);
 }
 
+.selected-user {
+    margin-top: 5px;
+    margin-right: 10px;
+    padding: 12px;
+    font-size: 1.3rem;
+    font-family: sans-serif;
+    list-style: none;
+    border: 1px solid black;
+    cursor: pointer;
+    background-color: rgb(241, 237, 237);
+}
+
 .message-box {
     width: 75vw;
     height: 80vh;
-    padding-right: 30px;
+    padding-right: 25px;
     overflow-y: auto;
     border: 1px solid;
     background-color: #fafafa;
@@ -42,6 +54,8 @@ body {
 }
 
 .message-box ul {
+    display: flex;
+    flex-direction: column;
     padding-left: 15px;
 }
 
@@ -50,38 +64,37 @@ body {
     font-family: Helvetica, sans-serif;
     padding-top: 8px;
     padding-bottom: 8px;
-    display: flex;
     margin-bottom: 20px;
+    list-style-type: none;
 }
 
-.message-box span {
-    justify-content: flex-start;
-    padding: 10px;
-    margin-left: 5px;
-
+.my-username {
+    margin-left: auto;
+    padding-right: 10px;
+    padding-bottom: 4px;
+    margin-right: 5px;
     font-family: Helvetica, sans-serif;
 }
 
-.my-message {
-    justify-content: flex-end;
-    margin-left: auto; /* pushes the message as far right as possible */
-    text-align: left;
-    width: 35%;
-    border: 1px solid;
-    border-radius: 20px;
-    padding: 10px;
-    background-color: rgb(122, 184, 253);
-    color: rgb(242, 241, 241);
+.other-username {
+    margin-right: auto;
+    padding-left: 10px;
+    padding-bottom: 6px;
+    margin-left: 5px;
+    font-family: Helvetica, sans-serif; 
 }
 
-.my-private-message {
+.my-message {
+    display: inline-block;
     justify-content: flex-end;
     margin-left: auto; /* pushes the message as far right as possible */
     text-align: left;
-    width: 35%;
-    border: 1px solid;
+    width: auto;
+    max-width: 33%;
     border-radius: 20px;
-    padding: 10px;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    margin-top: 3px;
     background-color: rgb(122, 184, 253);
     color: rgb(242, 241, 241);
 }
@@ -90,27 +103,16 @@ body {
     justify-content: flex-start;
     margin-right: auto;
     text-align: right;
-    width: 35%;
+    width: auto;
+    max-width: 33%;
     border-radius: 20px;
-    padding: 10px;
-    margin-bottom: 5px;
-    margin-top: 3px;
-    background-color: rgb(235, 235, 235);
-}
-
-.other-private-message {
-    justify-content: flex-start;
-    margin-right: auto;
-    text-align: right;
-    width: 35%;
-    border: 1px solid;
-    border-radius: 20px;
-    padding: 10px;
+    padding: 10px 15px;
+    margin-bottom: 3px;
     background-color: rgb(235, 235, 235);
 }
 
 .status-message {
-    justify-content: center;
+    align-self: center;
     font-weight: bold;
     color: rgb(93, 155, 206);
 }
