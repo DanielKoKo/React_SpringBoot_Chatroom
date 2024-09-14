@@ -32,20 +32,16 @@ function LoginPage() {
         return () => {
             if (stompClient) {
                 stompClient.disconnect()
-                console.log("WebSocket disconnected successfully")
             }
         }
     }, [])
 
     function onConnected(stompVar) {
-        console.log("Web Socket connection successful.")
         setStompClient(stompVar)
     }
 
     const navigateToChat = () => {
         if (stompClient) {
-            console.log("Navigating to /chatPage...")
-            console.log("passing stomp to /chatPage: ", stompClient)
             navigate("/chatPage", {state: {username: userData.username}})
         }
     }
@@ -76,7 +72,6 @@ function LoginPage() {
             
             if (res.data === true) {
                 if (path === "/login") {
-                    console.log("[" + userData.username + "] logged in.")
                     setInfo("Logging in...")
                 } 
                 else if (path === "/register") {

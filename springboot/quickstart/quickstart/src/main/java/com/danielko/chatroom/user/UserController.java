@@ -15,22 +15,13 @@ public class UserController {
 
     @PostMapping("/login")
     public boolean verifyLogin(@RequestBody List<String> data) {
-        boolean loggedIn = userService.searchForUsernameAndPassword(data);
-
-        if (loggedIn) {
-            System.out.println("User " + data.get(0) + " logged in successfully.");
-        }
-        else {
-            System.out.println("User " + data.get(0) + " failed to log in.");
-        }
-
-        return loggedIn;
+        return userService.searchForUsernameAndPassword(data);
     }
 
     @PostMapping("/register")
     public boolean verifyRegister(@RequestBody List<String> data) {
         boolean userExists = userService.searchForUsernameAndPassword(data);
-        System.out.println("/register received username " + data.get(0));
+
         if (userExists) {
             return false;
         }

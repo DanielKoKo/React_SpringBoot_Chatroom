@@ -25,10 +25,8 @@ public class MessageController {
     @PostMapping("/postMessage")
     @SendTo("/chatroom/public")
     public Message receiveMessage(@Payload Message message) {
-        System.out.println("Received " + message);
         switch (message.getStatus()) {
             case JOIN:
-                System.out.println("User [" + message.getSenderName() + "] has joined.");
                 message.setReceiverName("All");
                 message.setContent(message.getSenderName() + " has joined!");
                 messageService.uploadMessage(message);
@@ -37,7 +35,6 @@ public class MessageController {
                 messageService.uploadMessage(message);
                 break;
             case LEAVE:
-                System.out.println("Case LEAVE");
                 message.setReceiverName("All");
                 message.setContent(message.getSenderName() + " has left!");
                 messageService.uploadMessage(message);
@@ -45,13 +42,11 @@ public class MessageController {
                 break;
         }
 
-        System.out.println("Returning message " + message);
         return message;
     }
 
     @GetMapping("/fetchMessages")
     public ResponseEntity<List<Message>> getAllMessages(@RequestParam String username) {
-        System.out.println("/fetchMessages received username [" + username + "]");
         return new ResponseEntity<List<Message>>(messageService.getMessages(username), HttpStatus.OK);
     }
 }

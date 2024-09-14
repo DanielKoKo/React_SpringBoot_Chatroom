@@ -30,14 +30,12 @@ function ChatPage() {
     }
 
     function onConnected() {
-        console.log("Web Socket connection successful.")
         stompClient.subscribe('/chatroom/public', onMessageReceived)
     }
     
     const populateUsers = async() => {
         try {
             const response = await axios.get(baseURL + "/getUsers")
-            console.log("populateUsers received: " + response.data)
             setUsers(response.data)
         } catch (error) {
             console.error("Error populating users", error)
@@ -47,7 +45,6 @@ function ChatPage() {
     // connects user and fetch all messages upon startup
     useEffect(() => {
         if (userData.username != null) {
-            console.log("/chatpage received username [" + userData.username + "]")
             stompConnect()
             fetchMessages()
             populateUsers()
@@ -57,14 +54,12 @@ function ChatPage() {
         return () => {
             if (stompClient) {
                 stompClient.disconnect()
-                console.log("WebSocket disconnected successfully")
             }
         }
     }, [])
 
     function onMessageReceived(payload) {
         let payloadData = JSON.parse(payload.body)
-        console.log("onMessageReceived received payload [" + payloadData.senderName + ", " + payloadData.content + ", " + payloadData.status + "]")
         let newMessage = {
             senderName: payloadData.senderName,
             receiverName: payloadData.receiverName,
@@ -82,8 +77,6 @@ function ChatPage() {
     }
 
     function sendMessage(messageToSend) {
-        console.log("sendMessage received " + messageToSend)
-
         if (stompClient) {
             let chatMessage = {
                 senderName: userData.username,
@@ -92,7 +85,6 @@ function ChatPage() {
                 status: 'MESSAGE'
             }
 
-            console.log("sendMessage sending [" + chatMessage.senderName + ", " + chatMessage.receiverName + ", " + chatMessage.content + ", " + chatMessage.status + "]")
             stompClient.send('/app/message', {}, JSON.stringify(chatMessage))
             setUserData({...userData, "message":""})
         }
@@ -100,7 +92,6 @@ function ChatPage() {
 
     const fetchMessages = async () => {
         try {
-            console.log("fetchMessages sending username " + userData.username)
             const response = await axios.get(baseURL + "/fetchMessages?username=" + userData.username)
 
             setMessages(response.data)
@@ -110,15 +101,12 @@ function ChatPage() {
     }
 
     function handleTabChange(user) {
-        console.log("handleTabChange received: " + user)
-
         // checks if we're clicking on current tab
         if (user !== tab)
             setTab(user)
     }
 
     function getTabClass(user) {
-        console.log("getTabClass received: ", user)
         return user === tab ? "selected-user" : "unselected-user"
     }
 
@@ -134,8 +122,6 @@ function ChatPage() {
 
             // clear non-empty message input field
             document.getElementById("messageInput").value = ""
-    
-            console.log("Sending message: " + message)
     
             // need to pass message instead of using userData.message because it's not updated yet
             sendMessage(message) 
@@ -169,8 +155,6 @@ function ChatPage() {
     }
 
     function renderMessage(data) {
-        console.log("renderMessage received [" + data.senderName + ", " + data.receiverName + ", " + data.content + ", " + data.status + "]")
-
         // public message
         if (tab === "All" && data.receiverName === "All") {
             return data.content
