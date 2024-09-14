@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://192.168.1.118:3000")
+@CrossOrigin(origins = "http://192.168.1.118:3000") // modify IP address after install
 public class MessageController {
 
     @Autowired
@@ -22,6 +22,7 @@ public class MessageController {
     private UserController userController;
 
     @MessageMapping("/message")
+    @PostMapping("/postMessage")
     @SendTo("/chatroom/public")
     public Message receiveMessage(@Payload Message message) {
         System.out.println("Received " + message);

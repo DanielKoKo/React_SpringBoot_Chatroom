@@ -14,7 +14,7 @@ function LoginPage() {
     })
     const [stompClient, setStompClient] = useState(null)
     const navigate = useNavigate()
-    const baseURL = "http://192.168.1.118:8080"
+    const baseURL = "http://192.168.1.118:8080" // modify IP address after install
 
     function stompConnect() {
         let sock = new SockJS(baseURL + "/ws")

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://192.168.1.118:3000")
+@CrossOrigin(origins = "http://192.168.1.118:3000") // modify IP address after install
 public class UserController {
     @Autowired
     private UserService userService;
@@ -30,7 +30,7 @@ public class UserController {
     @PostMapping("/register")
     public boolean verifyRegister(@RequestBody List<String> data) {
         boolean userExists = userService.searchForUsernameAndPassword(data);
-
+        System.out.println("/register received username " + data.get(0));
         if (userExists) {
             return false;
         }
