@@ -7,7 +7,7 @@ export const WebSocketContext = createContext()
 
 function WebSocketProvider({children}) {
     const [stompClient, setStompClient] = useState(null)
-    const baseURL = "http://192.168.1.118:8080"
+    const baseURL = "http://xxx.xxx.x.xxx:8080"
 
     useEffect(() => {
         let sock = new SockJS(baseURL + "/ws")

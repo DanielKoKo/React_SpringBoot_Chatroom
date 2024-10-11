@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://192.168.1.118:3000") // modify IP address after install
+@CrossOrigin(origins = "http://xxx.xxx.x.xxx:3000") // modify IP address after install
 public class MessageController {
 
     @Autowired
