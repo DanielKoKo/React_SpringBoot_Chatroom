@@ -35,7 +35,7 @@ body {
     gap: 10px;
 }
 
-.buttons button {
+button {
     width: 7em;
     height: 3em;
     cursor: pointer;
@@ -44,4 +44,8 @@ body {
     font-size: 1em;
     font-weight: bold;
     border: 0;
+}
+
+button:hover {
+    background-color: rgba(132, 132, 252, 0.817);
 }
