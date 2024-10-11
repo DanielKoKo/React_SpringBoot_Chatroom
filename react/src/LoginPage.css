@@ -2,19 +2,35 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: white;
 }
 
 .login-box {
     display: flex;
     flex-direction: column;
-
-    width: 30vh;
+    width: 45vh;
     height: 40vh;
     padding: 20px;
     border-radius: 10px;
 }
 
-.login-box span {
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#error {
+    margin-bottom: 5px;
+    color: hsl(0, 92%, 44%);
+}
+
+#success {
+    margin-bottom: 5px;
+    color: black;
+}
+
+span {
     align-self: center;
     font-family: sans-serif;
     font-size: 1rem;
@@ -23,29 +39,50 @@ body {
 
 .login-box input {
     align-self: center;
-    
+    outline: none;
+    border: none;
+    border-bottom: 1px solid;
     height: 30px;
     width: 23em; 
-    padding-left: 15px;
+    padding-left: 10px;
 }
 
 .buttons {
     display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 10px;
+    flex-direction: column;
 }
 
-button {
-    width: 7em;
-    height: 3em;
+.buttons button {
+    margin-top: 5px;
+    width: 6.5em;
+    height: 2.5em;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
-    background-color: rgb(132,132,252);
+    background-color: rgb(51, 51, 51);
     color: rgba(243,246,255,255);
+    font-family: sans-serif;
     font-size: 1em;
-    font-weight: bold;
-    border: 0;
 }
 
-button:hover {
-    background-color: rgba(132, 132, 252, 0.817);
+.buttons button:hover:not(.underline-button) {
+    background-color: rgba(51, 51, 51, 0.822);
+}
+
+span {
+    margin-top: 5px;
+}
+
+.buttons .underline-button {
+    width: auto;
+    font-weight: bold;
+    text-decoration: underline;
+    background-color: white;
+    color: black;
+}
+
+span button:hover {
+    background-color: white;
 }

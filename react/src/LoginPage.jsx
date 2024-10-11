@@ -2,16 +2,17 @@ import axios from 'axios'
 import {useNavigate} from 'react-router-dom'
 import React, {useState, useEffect} from 'react'
 import './LoginPage.css'
-import {WebSocketContext} from './WebSocketProvider.jsx'
 import {over} from 'stompjs'
 import SockJS from 'sockjs-client/dist/sockjs'
 
 function LoginPage() {
+    const [signup, setSignup] = useState(false)
     const [info, setInfo] = useState("") // e.g. "incorrect username/password", "account already exists", etc.
     const [userData, setUserData] = useState({
         username: "",
         password: ""
     })
+    const [confirmPassword, setConfirmPassword] = useState("")
     const [stompClient, setStompClient] = useState(null)
     const navigate = useNavigate()
     const baseURL = "http://xxx.xxx.x.xxx:8080" // modify IP address after install
@@ -30,11 +31,15 @@ function LoginPage() {
 
         // clean up - disconnect upon component unmount
         return () => {
-            if (stompClient) {
+            if (stompClient) 
                 stompClient.disconnect()
-            }
         }
     }, [])
+
+    // clears input when switch from sign in -> sign up and vice versa
+    useEffect(() => {
+        resetInputs()
+    }, [signup]);
 
     function onConnected(stompVar) {
         setStompClient(stompVar)
@@ -49,12 +54,31 @@ function LoginPage() {
     function resetInputs() {
         document.getElementById("usernameInput").value = ""
         document.getElementById("passwordInput").value = ""
+        let confirmInput = document.getElementById("confirmPasswordInput")
+
+        setUserData({
+            username: "",
+            password: ""
+        })
+
+        // need to check if confirmPasswordInput exists first becasue it's only rendered
+        // in sign up page
+        if (confirmInput) {
+            setConfirmPassword("")
+            confirmInput.value = ""
+        }
     }
     
     function verifyFields() {
+        console.log("username: " + userData.username)
+        console.log("password: " + userData.password)
         if (userData.username === "" || userData.password === "") {
-            setInfo("Username or password field must not be empty!")
-            resetInputs()
+            setInfo("Username or password field must not be empty.")
+            return false
+        }
+
+        if (signup && (userData.password !== confirmPassword)) {
+            setInfo("Passwords do not match.")
             return false
         }
 
@@ -62,8 +86,10 @@ function LoginPage() {
     }
 
     const handleAxio = async(path) => {
-        if (!verifyFields()) 
+        if (!verifyFields()) {
+            resetInputs()
             return
+        }
 
         const send = [userData.username, userData.password]
 
@@ -83,42 +109,103 @@ function LoginPage() {
                 navigateToChat()
             }
             else {
-                path === "/login" ? setInfo("Incorrect username or password.") : setInfo("Error creating account.")
+                path === "/login" ? setInfo("Incorrect username or password.") : setInfo("Username is already taken.")
             }
 
             resetInputs()
         } catch (error) {
             setInfo("Connection error.")
+            resetInputs()
         }
     }
 
     function renderInfo() {
-        if (info !== "") {
-            return <span>{info}</span>
-        }
+        // Don't render if no info message exists
+        if (!info)
+            return null
+
+        return (info === "Logging in..." || 
+                info === "Account successfully created! Logging in...") ? <span id="success">{info}</span> :
+                                                                            <span id="error">{info}</span>
+    }
+
+    const renderLoginOrSignup = () => (
+        (!signup) ? renderLogin() : renderSignup()
+    )
+
+    function renderFields() {
+      return (
+        <>
+            <input 
+                type="text" 
+                id="usernameInput" 
+                placeholder="Username" 
+                autoComplete="off"
+                onChange={(e) => {setUserData({...userData, "username": e.target.value})
+                          setInfo("")
+                         }}
+            /><br/>
+            <input 
+                type="password" 
+                id="passwordInput" 
+                placeholder="Password" 
+                onChange={(e) => {setUserData({...userData, "password": e.target.value})
+                          setInfo("")
+                         }}
+            /><br/>
+        </>
+      )  
+    }
+
+    function renderLogin() {
+        return (
+            <div className="form">
+                {renderInfo()}
+                {renderFields()}
+                <div className="buttons">
+                    <button type="button" onClick={() => {handleAxio("/login")}}>Login</button> 
+                    <span>
+                        Don't have an account?
+                        <button type="button" className="underline-button" onClick={() => {setSignup(true)}}>Sign up</button>
+                    </span>
+                </div>
+            </div>
+        )
+    }
+
+    function renderSignup() {
+        return (
+            <div className="form">
+                {renderInfo()}
+                {renderFields()}
+                <input 
+                    type="password" 
+                    id="confirmPasswordInput" 
+                    placeholder="Confirm password" 
+                    onChange={(e) => {setConfirmPassword(e.target.value)
+                              setInfo("")
+                             }}
+                /><br/>
+                <div className="buttons">
+                    <button type="button" onClick={() => {handleAxio("/register")}}>Register</button> 
+                    <span>
+                        Have an account?
+                        <button type="button" className="underline-button" onClick={() => {setSignup(false)}}>Sign in</button>
+                    </span>
+                </div>
+            </div>
+        )
     }
 
     // - specify button as type="button" to avoid double submission (default browser behavior)
     // - need spread operators for setUserData because otherwise, the unspecified parameter will be set to ""
     return(
         <div className="login-box">
-            {renderInfo()}
-            <input 
-                type="text" 
-                id="usernameInput" 
-                placeholder="Username" 
-                onChange={(e) => setUserData({...userData, "username": e.target.value})}/><br/>
-            <input 
-                type="text" 
-                id="passwordInput" 
-                placeholder="Password" 
-                onChange={(e) => setUserData({...userData, "password": e.target.value})}/><br/>
-            <div className="buttons">
-                <button type="button" onClick={() => {handleAxio("/login")}}>Login</button> 
-                <button onClick={() => {handleAxio("/register")}}>Register</button>
-            </div>
+            {renderLoginOrSignup()}
         </div>
     )
 }
+
+//                 <button onClick={() => {handleAxio("/register")}}>Register</button>
 
 export default LoginPage
