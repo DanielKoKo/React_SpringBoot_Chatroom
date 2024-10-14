@@ -2,7 +2,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: white;
 }
 
 .login-box {
@@ -45,6 +44,7 @@ span {
     height: 30px;
     width: 23em; 
     padding-left: 10px;
+    background-color: #e5e5e5;
 }
 
 .buttons {
@@ -79,7 +79,7 @@ span {
     width: auto;
     font-weight: bold;
     text-decoration: underline;
-    background-color: white;
+    background-color: #e5e5e5;
     color: black;
 }
 

@@ -100,6 +100,12 @@ function ChatPage() {
         }
     }
 
+    const handleKeyPress = (e) => {
+        if (e.key === "Enter") {
+            handleMessageSubmit(e)
+        }
+    }
+
     function handleTabChange(user) {
         // checks if we're clicking on current tab
         if (user !== tab)
@@ -202,7 +208,7 @@ function ChatPage() {
                     </div>
 
                     <div className="message-input-box">
-                        <input type="text" id="messageInput" placeholder="Message..."/>
+                        <input type="text" id="messageInput" placeholder="Message..." onKeyDown={handleKeyPress}/>
                         <button onClick={handleMessageSubmit}>Send</button>
                     </div>
                     <div className="bottom-tab">

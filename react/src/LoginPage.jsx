@@ -85,6 +85,12 @@ function LoginPage() {
         return true
     }
 
+    const handleKeyPress = (e) => {
+        if (e.key === "Enter") {
+            signup ? handleAxio("/register") : handleAxio("/login")
+        }
+    }
+
     const handleAxio = async(path) => {
         if (!verifyFields()) {
             resetInputs()
@@ -144,6 +150,7 @@ function LoginPage() {
                 onChange={(e) => {setUserData({...userData, "username": e.target.value})
                           setInfo("")
                          }}
+                onKeyDown={handleKeyPress}
             /><br/>
             <input 
                 type="password" 
@@ -152,6 +159,7 @@ function LoginPage() {
                 onChange={(e) => {setUserData({...userData, "password": e.target.value})
                           setInfo("")
                          }}
+                onKeyDown={handleKeyPress}
             /><br/>
         </>
       )  
