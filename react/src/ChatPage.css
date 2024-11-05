@@ -16,32 +16,31 @@ body {
 
 .users-frame {
     justify-content: center;    
-    margin-top: -16px;
+    margin-right: 10px;
+}
+
+.user-dropdown {
+    height: 30px;
 }
 
 .unselected-user {
     margin-top: 5px;
     margin-right: 10px;
     padding: 12px;
-    font-size: 1.3rem;
     font-family: sans-serif;
     list-style: none;
     border: 1px solid black;
     cursor: pointer;
-    background-color: #7d88c4;
-    color: rgb(246, 242, 242);
 }
 
 .selected-user {
     margin-top: 5px;
     margin-right: 10px;
     padding: 12px;
-    font-size: 1.3rem;
     font-family: sans-serif;
     list-style: none;
     border: 1px solid black;
     cursor: pointer;
-    background-color: rgb(241, 237, 237);
 }
 
 .message-box {

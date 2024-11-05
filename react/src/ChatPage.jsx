@@ -36,7 +36,7 @@ function ChatPage() {
     const populateUsers = async() => {
         try {
             const response = await axios.get(baseURL + "/getUsers")
-            setUsers(response.data)
+            setUsers(["All", ...response.data])
         } catch (error) {
             console.error("Error populating users", error)
         }
@@ -116,6 +116,12 @@ function ChatPage() {
         return user === tab ? "selected-user" : "unselected-user"
     }
 
+    function getMessageClass(data) {
+        if (data.status === "JOIN" || data.status === "LEAVE")
+            return 'status-message'
+
+        return data.senderName === userData.username ? "my-message" : "other-message"
+    }
     
     const handleMessageSubmit = async(e) => {
         e.preventDefault()
@@ -147,13 +153,6 @@ function ChatPage() {
 
     const navigateToLoginPage = () => { navigate("/") }
 
-    function getMessageClass(data) {
-        if (data.status === "JOIN" || data.status === "LEAVE")
-            return 'status-message'
-
-        return data.senderName === userData.username ? "my-message" : "other-message"
-    }
-
     function renderUsername(data) {
         if (data.status === "MESSAGE") {
             return <span className={(data.senderName === userData.username) ? "my-username" : "other-username"}>{data.senderName}</span>
@@ -175,19 +174,17 @@ function ChatPage() {
         <>
             <div className="frame">
                 <div className="users-frame">
-                    <ul>
-                        <li key={"All"} className={getTabClass("All")} onClick={() => {handleTabChange("All")}}>All</li>
+                    <select className="user-dropdown" onChange={(e) => {handleTabChange(e.target.value)}}>
                         {users.map((user, index) => {
-                                if (user != userData.username) {
-                                    return <li key={index}
-                                               className={getTabClass(user)}
-                                               onClick={() => {handleTabChange(user)}}>
-                                               {user}
-                                            </li>    
-                                }
-                            }
+                                    if (user != userData.username) {
+                                        return <option key={index}
+                                                className={getTabClass(user)}
+                                                onClick={() => {handleTabChange(user)}}>
+                                                {user}
+                                                </option>    
+                                    }}
                         )}
-                    </ul>
+                    </select>
                 </div>
 
                 <div className="message-frame">
@@ -212,7 +209,7 @@ function ChatPage() {
                         <button onClick={handleMessageSubmit}>Send</button>
                     </div>
                     <div className="bottom-tab">
-                        <button onClick={navigateToLoginPage}>Leave Chat</button>
+                        <button onClick={navigateToLoginPage}>Go Back</button>
                         <button onClick= {() => {if (window.confirm("This action will delete your account and cannot be reversed!")) handleExit()}}>Delete Account</button>
                     </div>
                 </div>
