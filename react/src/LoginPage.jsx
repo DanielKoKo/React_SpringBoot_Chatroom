@@ -15,7 +15,7 @@ function LoginPage() {
     const [confirmPassword, setConfirmPassword] = useState("")
     const [stompClient, setStompClient] = useState(null)
     const navigate = useNavigate()
-    const baseURL = "http://xxx.xxx.x.xxx:8080" // modify IP address after install
+    const baseURL = "https://xxx.xxx.x.xxx:8080" // modify IP address after install
 
     function stompConnect() {
         let sock = new SockJS(baseURL + "/ws")
