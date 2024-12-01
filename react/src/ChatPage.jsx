@@ -112,10 +112,6 @@ function ChatPage() {
             setTab(user)
     }
 
-    function getTabClass(user) {
-        return user === tab ? "selected-user" : "unselected-user"
-    }
-
     function getMessageClass(data) {
         if (data.status === "JOIN" || data.status === "LEAVE")
             return 'status-message'
@@ -178,7 +174,6 @@ function ChatPage() {
                         {users.map((user, index) => {
                                     if (user != userData.username) {
                                         return <option key={index}
-                                                className={getTabClass(user)}
                                                 onClick={() => {handleTabChange(user)}}>
                                                 {user}
                                                 </option>    

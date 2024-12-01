@@ -1,46 +1,15 @@
-body {
-    overflow: hidden;
-    background-color: #e5e5e5;
-}
-
 .frame {
     display: flex;
-    flex-direction: row;
-}
-
-@media only screen and (max-width: 20px) {
-    body {
-        overflow: auto;
-    }
+    justify-content: center;
+    font-family: Helvetica, sans-serif;
 }
 
 .users-frame {
-    justify-content: center;    
     margin-right: 10px;
 }
 
 .user-dropdown {
     height: 30px;
-}
-
-.unselected-user {
-    margin-top: 5px;
-    margin-right: 10px;
-    padding: 12px;
-    font-family: sans-serif;
-    list-style: none;
-    border: 1px solid black;
-    cursor: pointer;
-}
-
-.selected-user {
-    margin-top: 5px;
-    margin-right: 10px;
-    padding: 12px;
-    font-family: sans-serif;
-    list-style: none;
-    border: 1px solid black;
-    cursor: pointer;
 }
 
 .message-box {
@@ -50,7 +19,6 @@ body {
     overflow-y: auto;
     border: 1px solid;
     background-color: #fafafa;
-    word-wrap: break-word;
 }
 
 .message-box ul {
@@ -60,54 +28,38 @@ body {
 }
 
 .message-box li {
-    font-size: 1.4rem;
-    font-family: Helvetica, sans-serif;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    max-width: 50%;
+    border-radius: 20px;
+    padding: 10px 15px;
     margin-bottom: 20px;
     list-style-type: none;
+    font-size: 1.4rem;
+}
+
+.frame span {
+    margin-bottom: 2px;
 }
 
 .my-username {
     margin-left: auto;
     padding-right: 10px;
-    padding-bottom: 4px;
-    margin-right: 5px;
-    font-family: Helvetica, sans-serif;
 }
 
 .other-username {
     margin-right: auto;
     padding-left: 10px;
-    padding-bottom: 6px;
-    margin-left: 5px;
-    font-family: Helvetica, sans-serif; 
 }
 
 .my-message {
-    display: inline-block;
-    justify-content: flex-end;
     margin-left: auto; /* pushes the message as far right as possible */
     text-align: left;
-    width: auto;
-    max-width: 33%;
-    border-radius: 20px;
-    padding: 10px 15px;
-    margin-bottom: 5px;
-    margin-top: 3px;
     background-color: rgb(122, 184, 253);
     color: rgb(242, 241, 241);
 }
 
 .other-message {
-    justify-content: flex-start;
     margin-right: auto;
-    text-align: right;
-    width: auto;
-    max-width: 33%;
-    border-radius: 20px;
-    padding: 10px 15px;
-    margin-bottom: 3px;
+    text-align: left;
     background-color: rgb(235, 235, 235);
 }
 
@@ -147,4 +99,36 @@ body {
 
 .bottom-tab button {
     padding: 4px;
+}
+
+@media screen and (max-width: 600px) {
+    .frame {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .message-box {
+        width: 85vw;
+    }
+
+    .message-box li {
+        min-width: 30px;
+        max-width: 200px;
+        padding: 9px 11px;
+        font-size: 1rem;
+    }
+    .user-dropdown {
+        margin-bottom: 10px;
+    }
+}
+
+@media screen and (max-height: 800px) {
+    .frame {
+        margin-bottom: 85px;
+    }
+    
+    .message-box {
+        height: 580px;
+    }
 }
