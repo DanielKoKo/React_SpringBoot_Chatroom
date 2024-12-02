@@ -18,7 +18,7 @@ function ChatPage() {
     })
 
     const baseURL = "http://xxx.xxx.x.xxx:8080" // modify IP address after install
-    
+
     const populateUsers = async() => {
         try {
             const response = await axios.get(baseURL + "/getUsers")
@@ -34,6 +34,8 @@ function ChatPage() {
             fetchMessages()
             populateUsers()
         }
+
+        stompClient.subscribe('/chatroom/public', onMessageReceived)
     }, [])
 
     function onMessageReceived(payload) {
