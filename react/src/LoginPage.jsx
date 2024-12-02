@@ -1,11 +1,11 @@
 import axios from 'axios'
 import {useNavigate} from 'react-router-dom'
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import './LoginPage.css'
-import {over} from 'stompjs'
-import SockJS from 'sockjs-client/dist/sockjs'
+import { WebSocketContext } from './WebSocketProvider'
 
 function LoginPage() {
+    const stompClient = useContext(WebSocketContext);
     const [signup, setSignup] = useState(false)
     const [info, setInfo] = useState("") // e.g. "incorrect username/password", "account already exists", etc.
     const [userData, setUserData] = useState({
@@ -13,37 +13,13 @@ function LoginPage() {
         password: ""
     })
     const [confirmPassword, setConfirmPassword] = useState("")
-    const [stompClient, setStompClient] = useState(null)
     const navigate = useNavigate()
-    const baseURL = "https://xxx.xxx.x.xxx:8080" // modify IP address after install
-
-    function stompConnect() {
-        let sock = new SockJS(baseURL + "/ws")
-        let stompVar = over(sock) // wraps the SockJS client with STOMP capabilities
-        
-        stompVar.connect({},                       // headers to send
-                         onConnected(stompVar),    // called when STOMP connection is successful
-                         (e) => {console.log(e)})  // called when STOMP connection is unsuccessful
-    }
-
-    useEffect(() => {
-        stompConnect()
-
-        // clean up - disconnect upon component unmount
-        return () => {
-            if (stompClient) 
-                stompClient.disconnect()
-        }
-    }, [])
+    const baseURL = "http://xxx.xxx.x.xxx:8080" // modify IP address after install
 
     // clears input when switch from sign in -> sign up and vice versa
     useEffect(() => {
         resetInputs()
     }, [signup]);
-
-    function onConnected(stompVar) {
-        setStompClient(stompVar)
-    }
 
     const navigateToChat = () => {
         if (stompClient) {

@@ -1,13 +1,12 @@
-import React, {useState, useEffect, memo} from 'react'
+import React, {useState, useEffect, useContext, memo} from 'react'
 import {useLocation, useNavigate} from 'react-router-dom'
 import axios from 'axios'
 import './ChatPage.css'
-import {over} from 'stompjs'
-import SockJS from 'sockjs-client/dist/sockjs'
 
-let stompClient = null
+import { WebSocketContext } from './WebSocketProvider'
 
 function ChatPage() {
+    const stompClient = useContext(WebSocketContext);
     const location = useLocation()
     const navigate = useNavigate()
     const [messages, setMessages] = useState([])
@@ -18,20 +17,7 @@ function ChatPage() {
         message: ""
     })
 
-    const baseURL = "https://xxx.xxx.x.xxx:8080" // modify IP address after install
-
-    function stompConnect() {
-        let sock = new SockJS(baseURL + "/ws")
-        stompClient  = over(sock) // wraps the SockJS client with STOMP capabilities
-        
-        stompClient.connect({},                    // headers to send
-                         onConnected,              // called when STOMP connection is successful
-                         (e) => {console.log(e)})  // called when STOMP connection is unsuccessful
-    }
-
-    function onConnected() {
-        stompClient.subscribe('/chatroom/public', onMessageReceived)
-    }
+    const baseURL = "http://xxx.xxx.x.xxx:8080" // modify IP address after install
     
     const populateUsers = async() => {
         try {
@@ -42,19 +28,11 @@ function ChatPage() {
         }
     }
 
-    // connects user and fetch all messages upon startup
+    // fetch all messages and usernames upon startup
     useEffect(() => {
         if (userData.username != null) {
-            stompConnect()
             fetchMessages()
             populateUsers()
-        }
-
-        // clean up - unsubscribe and disconnect upon component unmount
-        return () => {
-            if (stompClient) {
-                stompClient.disconnect()
-            }
         }
     }, [])
 
