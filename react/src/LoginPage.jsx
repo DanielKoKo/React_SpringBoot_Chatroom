@@ -1,8 +1,10 @@
 import axios from 'axios'
 import {useNavigate} from 'react-router-dom'
 import React, {useState, useEffect, useContext} from 'react'
-import './LoginPage.css'
 import { WebSocketContext } from './WebSocketProvider'
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+import './LoginPage.css'
 
 function LoginPage() {
     const stompClient = useContext(WebSocketContext);
@@ -148,6 +150,17 @@ function LoginPage() {
                 {renderFields()}
                 <div className="buttons">
                     <button type="button" onClick={() => {handleAxio("/login")}}>Login</button> 
+                    <p>OR</p>
+                    <GoogleLogin
+                    onSuccess={(credentialResponse) => {
+                    console.log(credentialResponse);
+                    const decoded = jwtDecode(credentialResponse.credential);
+                    console.log('decoded: ' + JSON.stringify(decoded));
+                    }}
+                    onError={() => {
+                    console.log("Login Failed");
+                    }}
+                />
                     <span>
                         Don't have an account?
                         <button type="button" className="underline-button" onClick={() => {setSignup(true)}}>Sign up</button>
@@ -189,7 +202,5 @@ function LoginPage() {
         </div>
     )
 }
-
-//                 <button onClick={() => {handleAxio("/register")}}>Register</button>
 
 export default LoginPage

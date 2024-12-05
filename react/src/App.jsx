@@ -1,7 +1,9 @@
 import WebSocketProvider from "./WebSocketProvider.jsx";
 
 function App() {
-  return <WebSocketProvider />;
+  return (
+      <WebSocketProvider />
+  );
 }
 
 export default App;
