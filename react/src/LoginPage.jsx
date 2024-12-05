@@ -1,13 +1,11 @@
 import axios from 'axios'
 import {useNavigate} from 'react-router-dom'
-import React, {useState, useEffect, useContext} from 'react'
-import { WebSocketContext } from './WebSocketProvider'
+import React, {useState, useEffect} from 'react'
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import './LoginPage.css'
 
 function LoginPage() {
-    const stompClient = useContext(WebSocketContext);
     const [signup, setSignup] = useState(false)
     const [info, setInfo] = useState("") // e.g. "incorrect username/password", "account already exists", etc.
     const [userData, setUserData] = useState({
@@ -24,9 +22,7 @@ function LoginPage() {
     }, [signup]);
 
     const navigateToChat = () => {
-        if (stompClient) {
-            navigate("/chatPage", {state: {username: userData.username}})
-        }
+        navigate("/chatPage", {state: {username: userData.username}})
     }
 
     function resetInputs() {
@@ -48,8 +44,6 @@ function LoginPage() {
     }
     
     function verifyFields() {
-        console.log("username: " + userData.username)
-        console.log("password: " + userData.password)
         if (userData.username === "" || userData.password === "") {
             setInfo("Username or password field must not be empty.")
             return false
