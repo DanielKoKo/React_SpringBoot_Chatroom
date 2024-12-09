@@ -1,6 +1,6 @@
 ## Introduction
 This is a full-stack chatroom built using React.js and Spring Boot in conjunction with MongoDB. The front-end is built with [Vite](https://vitejs.dev/), which provides simple, optimized builds right out of the box.<br><br>
-The project is deployed on AWS EC2 and can be accessed [here](http://18.222.21.226:3000). Alternatively, the project can be run locally via the steps below.
+The project is deployed on AWS EC2 and can be accessed [here](http://18.227.81.255:3000). Alternatively, the project can be run locally via the steps below.
 
 ## Prerequisites
 Ensure the following software is installed on your machine:
