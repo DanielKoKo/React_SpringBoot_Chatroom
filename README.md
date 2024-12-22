@@ -26,4 +26,5 @@ Ensure the following software is installed on your machine:
    Open http://xxx.xxx.x.xxx:3000 in your web browser, where xxx.xxx.x.xxx is your network's IPv4 address.
 
 ## Screenshots
-![chatroom_screenshot](https://github.com/user-attachments/assets/943a8b81-9d9b-46ac-8099-de9fd25d5a1d)
+![image](https://github.com/user-attachments/assets/3ae15402-a78c-47ac-b059-920eb0cedcb2)
+<img src="https://github.com/user-attachments/assets/79e7cdfa-b9b4-4b48-b674-df1e2ea82dae" width="350">
